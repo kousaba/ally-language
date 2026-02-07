@@ -21,8 +21,8 @@ std::optional<std::string> ErrorMessageManager::getErrorMessage(Code code) {
 }
 ErrorMessageManager::ErrorMessageManager() {
   addMessage(Code::ERR_LEX_UNKNOWN_SYMBOL,
-             {"Unknown Symbol %0 Detected in (line: %1, column: %2)",
-              "不明な記号%0が行%1、列%2で検知されました"});
+             {"Unknown Symbol %1 Detected in (line: %2, column: %3)",
+              "不明な記号%1が行%2、列%3で検知されました"});
 }
 } // namespace error
 } // namespace ally

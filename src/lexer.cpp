@@ -60,7 +60,7 @@ inline static std::map<std::string, TokenType> KEYWORDS = {
 
 Token Lexer::parseWords() {
   std::string value;
-  while (!isAtEnd() && (isalpha(peek()) || peek() == '_')) {
+  while (!isAtEnd() && (std::isalnum(peek()) || peek() == '_')) {
     value += advance();
   }
   if (KEYWORDS.contains(value)) {

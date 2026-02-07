@@ -12,11 +12,14 @@ int main(int argc, char *argv[]) {
 fn calc(){
   return 5;
 }
+fn calc2(){
+  return 3;
+}
   )";
-  std::cout << source << std::endl;
   ally::Lexer lexer(source);
   auto tokens = lexer.tokenize();
   lexer.printTokens();
+  ally::error::ErrorHandler::getInstance().printAllErrors();
 
   return 0;
 }

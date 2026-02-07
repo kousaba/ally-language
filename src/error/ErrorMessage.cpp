@@ -20,7 +20,9 @@ std::optional<std::string> ErrorMessageManager::getErrorMessage(Code code) {
   return std::nullopt; // エラーメッセージが見つからなかった
 }
 ErrorMessageManager::ErrorMessageManager() {
-  addMessage(Code::COM_UNKNOWN_VAR, {"HI!!", "This is ErrorMessage"});
+  addMessage(Code::ERR_LEX_UNKNOWN_SYMBOL,
+             {"Unknown Symbol %0 Detected in (line: %1, column: %2)",
+              "不明な記号%0が行%1、列%2で検知されました"});
 }
 } // namespace error
 } // namespace ally

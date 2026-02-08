@@ -1,4 +1,6 @@
 #pragma once
+#include "ally/location.h"
+#include <memory>
 #include <string>
 #include <vector>
 namespace ally::ast {
@@ -13,28 +15,14 @@ enum class NodeType {
   FUNCTION,
   NUMBERLITERAL,
   RETURN,
+  BLOCK,
 };
 class Node {
   NodeType nodeType;
-  int line;
-  int column;
+  Location loc;
 
 public:
-  Node(NodeType type, int line, int column)
-      : nodeType(type), line(line), column(column) {}
+  Node(NodeType type, Location loc) : nodeType(type), loc(loc) {}
   virtual ~Node() = default;
-};
-struct Arg {
-  Type type;
-  std::string name;
-};
-class FunctionNode : public Node {
-  std::vector<Arg> args;
-  std::string functionName;
-
-public:
-  FunctionNode(std::string funcName, std::vector<Arg> arg, int line, int column)
-      : functionName(std::move(funcName)), args(std::move(arg)),
-        Node(NodeType::FUNCTION, line, column) {}
 };
 } // namespace ally::ast

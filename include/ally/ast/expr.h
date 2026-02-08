@@ -12,7 +12,7 @@ class NumberLiteralNode : public ExprNode {
   int64_t number;
 
 public:
-  NumberLiteralNode(int64_t number, int line, int column)
-      : number(number), ExprNode(NodeType::NUMBERLITERAL, line, column) {}
+  NumberLiteralNode(int64_t number, Location loc)
+      : number(number), ExprNode(NodeType::NUMBERLITERAL, loc) {}
 };
 } // namespace ally::ast

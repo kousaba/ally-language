@@ -9,8 +9,8 @@
 namespace ally {
 std::vector<Token> Lexer::tokenize() {
   pos = 0;
-  line = 0;
-  column = 0;
+  loc.line = 0;
+  loc.column = 0;
   std::vector<Token> tokens;
   while (!isAtEnd()) {
     skipWhitespace();
@@ -25,10 +25,10 @@ std::vector<Token> Lexer::tokenize() {
 char Lexer::peek(int offset) { return source[pos + offset]; }
 char Lexer::advance() {
   if (source[pos] == '\n') {
-    line++;
-    column = 0;
+    loc.line++;
+    loc.column = 0;
   } else {
-    column++;
+    loc.column++;
   }
   return source[pos++];
 }
@@ -91,12 +91,13 @@ Token Lexer::parseSymbols() {
   default:
     error::ErrorHandler::getInstance().report(
         error::Code::ERR_LEX_UNKNOWN_SYMBOL,
-        {std::string(1, c), std::to_string(line), std::to_string(column)});
+        {std::string(1, c), std::to_string(loc.line),
+         std::to_string(loc.column)});
   }
   return makeToken(TokenType::UNKNOWN, std::string(1, c));
 }
 Token Lexer::makeToken(TokenType type, std::string value) {
-  return Token{type, value, line, column};
+  return Token{type, value, loc};
 }
 
 // For debug
@@ -114,15 +115,15 @@ inline static std::map<TokenType, std::string> tokenTypeToName = {
 };
 void Lexer::printTokens() {
   pos = 0;
-  line = 0;
-  column = 0;
+  loc.line = 0;
+  loc.column = 0;
   auto result = tokenize();
   std::cerr << "-----Tokenize Result-----  Tokens:" << result.size()
             << std::endl;
   for (auto &&token : result) {
     std::cerr << "{Token: " << tokenTypeToName[token.type]
-              << " Value: " << token.value << " PLACE: " << token.line << " "
-              << token.column << "}" << std::endl;
+              << " Value: " << token.value << " PLACE: " << token.loc.line
+              << " " << token.loc.column << "}" << std::endl;
   }
 }
 

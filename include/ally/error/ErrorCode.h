@@ -15,6 +15,8 @@ namespace error {
 // ErrorType_ErrorPlace_Error
 enum class Code {
   ERR_LEX_UNKNOWN_SYMBOL,
+  ERR_PAR_UNKNOWN_EXPR_TOKEN,
+  ERR_PAR_UNKNOWN_STMT_TOKEN,
 };
 } // namespace error
 } // namespace ally

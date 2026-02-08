@@ -2,6 +2,7 @@
 #include "ally/error/ErrorHandler.h"
 #include "ally/error/ErrorMessage.h"
 #include "ally/lexer/lexer.h"
+#include "ally/parser/parser.h"
 #include <iostream>
 
 int main(int argc, char *argv[]) {
@@ -10,15 +11,18 @@ int main(int argc, char *argv[]) {
       ally::error::Language::ja);
   std::string source = R"(
 fn calc(){
-  return 5;
+  return 5
 }
 fn calc2(){
-  return 3;
+  return 3
 }
   )";
   ally::Lexer lexer(source);
   auto tokens = lexer.tokenize();
   lexer.printTokens();
+  ally::Parser parser(tokens);
+  std::cout << "Parser parsing...." << std::endl;
+  auto ast = parser.parse();
   ally::error::ErrorHandler::getInstance().printAllErrors();
 
   return 0;

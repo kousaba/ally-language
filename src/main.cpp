@@ -3,6 +3,8 @@
 #include "ally/error/ErrorMessage.h"
 #include "ally/lexer/lexer.h"
 #include "ally/parser/parser.h"
+#include "ally/sema/SymbolTable.h"
+#include "ally/sema/sema.h"
 #include <iostream>
 
 int main(int argc, char *argv[]) {
@@ -13,7 +15,7 @@ int main(int argc, char *argv[]) {
 fn calc(){
   return 5
 }
-fn calc2(){
+fn calc(){
   return 3
 }
   )";
@@ -23,6 +25,9 @@ fn calc2(){
   ally::Parser parser(tokens);
   std::cout << "Parser parsing...." << std::endl;
   auto ast = parser.parse();
+  ally::sema::SemanticAnalysis sema(std::move(ast));
+  sema.analysis();
+  ally::sema::SymbolTable::getInstance().dump();
   ally::error::ErrorHandler::getInstance().printAllErrors();
 
   return 0;

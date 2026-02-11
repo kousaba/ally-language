@@ -6,6 +6,7 @@ namespace ally {
 enum class TokenType {
   FN,
   RETURN,
+  LET,
   IDENTIFIER,
   NUMBER,
   SEMI,

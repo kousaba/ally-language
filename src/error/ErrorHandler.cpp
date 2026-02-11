@@ -7,8 +7,7 @@ namespace ally {
 namespace error {
 void ErrorHandler::printError(Error error) {
   // TODO: Error, Fatalなどを分ける
-  std::cerr << "[Error]: " << error.message;
-  std::cerr << std::endl;
+  std::cerr << "[Error]: " << error.message << std::endl;
 }
 
 void ErrorHandler::report(Code code, std::vector<std::string> args) {

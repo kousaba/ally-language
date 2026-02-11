@@ -19,6 +19,9 @@ public:
                std::unique_ptr<BlockNode> block, Location loc)
       : Node(NodeType::FUNCTION, loc), functionName(std::move(funcName)),
         args(std::move(arg)), block(std::move(block)) {}
+  void firstAnalysis();
+  void secondAnalysis();
+  Node *analysis() override;
 };
 
 }; // namespace ally::ast

@@ -1,14 +1,14 @@
 #pragma once
 #include "ally/location.h"
-#include <memory>
-#include <string>
-#include <vector>
 namespace ally::ast {
-enum class TypeInfo { INT, I32, I16, FLOAT, F32, F16 };
+enum class TypeInfo { INT, I32, I16, FLOAT, F32, F16, UNKNOWN };
 
 struct Type {
   TypeInfo info;
   int pointer = 0; // *なら1, **なら2
+  bool operator==(Type another);
+  bool operator!=(Type another);
+  Type(TypeInfo info, int pointer = 0) : info(info), pointer(pointer) {}
 };
 enum class NodeType {
   TYPE,
@@ -16,6 +16,7 @@ enum class NodeType {
   NUMBERLITERAL,
   RETURN,
   BLOCK,
+  LET,
 };
 class Node {
   NodeType nodeType;
@@ -24,5 +25,6 @@ class Node {
 public:
   Node(NodeType type, Location loc) : nodeType(type), loc(loc) {}
   virtual ~Node() = default;
+  virtual Node *analysis() = 0;
 };
 } // namespace ally::ast

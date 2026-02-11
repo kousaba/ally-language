@@ -29,6 +29,15 @@ ErrorMessageManager::ErrorMessageManager() {
   addMessage(Code::ERR_PAR_UNKNOWN_STMT_TOKEN,
              {"Unknown Token Detected in statement: (line: %1, column: %2)",
               "不明なトークンが分: 行%1、列%2で検知されました"});
+  addMessage(Code::ERR_SEM_MULTIPLE_FUNCTION_DECL,
+             {"Function %1 is defined multiple times",
+              "関数%1が複数回定義されています"});
+  addMessage(Code::COM_SEM_FUNCTIONNODE_VISITED,
+             {"FunctionNode visited during SemanticAnalysis",
+              "SemanticAnalysis中にFunctionNodeをvisitしました"});
+  addMessage(Code::COM_SEM_EXPECTED_EXPR,
+             {"Expecting an ExprNode, but something else came.",
+              "ExprNodeを期待しましたが、それ以外のものが来ました。"});
 }
 } // namespace error
 } // namespace ally

@@ -7,8 +7,8 @@
 namespace ally {
 namespace error {
 struct Message {
-  std::string ja;
   std::string en;
+  std::string ja;
 };
 enum class Language { en, ja };
 class ErrorMessageManager {
@@ -30,6 +30,7 @@ public:
   std::optional<std::string> getErrorMessage(Code code);
   // 言語設定
   void setLanguage(Language lang) { this->language = lang; }
+  Language getLanguage() { return language; }
 };
 } // namespace error
 } // namespace ally

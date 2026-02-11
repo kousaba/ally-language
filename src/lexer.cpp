@@ -56,6 +56,7 @@ std::optional<Token> Lexer::nextToken() {
 inline static std::map<std::string, TokenType> KEYWORDS = {
     {"fn", TokenType::FN},
     {"return", TokenType::RETURN},
+    {"let", TokenType::LET},
 };
 
 Token Lexer::parseWords() {
@@ -104,6 +105,7 @@ Token Lexer::makeToken(TokenType type, std::string value) {
 inline static std::map<TokenType, std::string> tokenTypeToName = {
     {TokenType::FN, "FN"},
     {TokenType::RETURN, "RETURN"},
+    {TokenType::LET, "LET"},
     {TokenType::IDENTIFIER, "IDENTIFIER"},
     {TokenType::NUMBER, "NUMBER"},
     {TokenType::SEMI, "SEMI"},

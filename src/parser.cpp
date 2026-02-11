@@ -31,8 +31,11 @@ bool Parser::match(TokenType type) {
 
 std::unique_ptr<ast::FunctionNode> Parser::nextFunction() {
   Location fnLocation = loc;
-  if (advance().type != TokenType::FN)
+  if (advance().type != TokenType::FN) {
+    std::cerr << "in parsing functionNode, advance().type != TokenType::FN!"
+              << std::endl;
     return nullptr;
+  }
   std::string funcName = advance().value;
   if (!match(TokenType::LPAREN)) {
     // Expected '(' after function name.
@@ -94,6 +97,7 @@ std::unique_ptr<ast::BlockNode> Parser::parseBlock() {
   while (!check(TokenType::RBRACKET)) {
     stmt.push_back(parseStmt());
   }
+  advance(); // RBRACKET用
   return std::make_unique<ast::BlockNode>(std::move(stmt), nowLoc);
 }
 

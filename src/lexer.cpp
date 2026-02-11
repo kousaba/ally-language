@@ -89,6 +89,8 @@ Token Lexer::parseSymbols() {
     return makeToken(TokenType::LBRACKET, "{");
   case '}':
     return makeToken(TokenType::RBRACKET, "}");
+  case '=':
+    return makeToken(TokenType::EQ, "=");
   default:
     error::ErrorHandler::getInstance().report(
         error::Code::ERR_LEX_UNKNOWN_SYMBOL,

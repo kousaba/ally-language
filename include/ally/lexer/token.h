@@ -14,6 +14,7 @@ enum class TokenType {
   RPAREN,
   LBRACKET,
   RBRACKET,
+  EQ,
   UNKNOWN,
 };
 struct Token {

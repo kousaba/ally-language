@@ -34,6 +34,9 @@ void SymbolTable::dump() {
       if (symbol.type == SymbolType::FUNCTION) {
         std::cout << " [Function]";
       }
+      if (symbol.type == SymbolType::VAR) {
+        std::cout << " [Variable]";
+      }
       std::cout << std::endl;
     }
   }

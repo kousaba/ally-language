@@ -16,6 +16,7 @@ struct FunctionSymbol {
 };
 struct VarSymbol {
   ast::Type varType;
+  bool isMutable;
 };
 struct UnknownSymbol {};
 struct Symbol {
@@ -25,5 +26,6 @@ struct Symbol {
   Symbol(VarSymbol symbol) : symbol(symbol), type(SymbolType::VAR) {}
   Symbol(UnknownSymbol symbol) : symbol(symbol), type(SymbolType::UNKNOWN) {}
   Symbol() : symbol(UnknownSymbol{}), type(SymbolType::UNKNOWN) {}
+  explicit operator bool() const { return type != SymbolType::UNKNOWN; }
 };
 } // namespace ally::sema

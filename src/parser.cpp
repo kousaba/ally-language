@@ -1,5 +1,6 @@
 #include "ally/parser/parser.h"
 #include "ally/ast/function.h"
+#include "ally/ast/other.h"
 #include "ally/ast/stmt.h"
 #include "ally/error/ErrorHandler.h"
 #include <iostream>
@@ -65,6 +66,8 @@ std::unique_ptr<ast::StmtNode> Parser::parseStmt() {
     return parseBlock();
   else if (peek().type == TokenType::RETURN)
     return parseReturnStmt();
+  else if (peek().type == TokenType::LET)
+    return parseLetStmt();
   else {
     error::ErrorHandler::getInstance().report(
         error::Code::ERR_PAR_UNKNOWN_STMT_TOKEN,
@@ -99,6 +102,24 @@ std::unique_ptr<ast::BlockNode> Parser::parseBlock() {
   }
   advance(); // RBRACKET用
   return std::make_unique<ast::BlockNode>(std::move(stmt), nowLoc);
+}
+
+std::unique_ptr<ast::LetNode> Parser::parseLetStmt() {
+  Location nowLoc = loc;
+  if (!match(TokenType::LET)) {
+    // TODO: エラー
+  }
+  if (!check(TokenType::IDENTIFIER)) {
+    // TODO: エラー(変数名のところに予約語をおくな)
+  }
+  std::string varName = advance().value;
+  std::unique_ptr<ast::ExprNode> expr = nullptr;
+  if (match(TokenType::EQ)) {
+    expr = parseExpr();
+  }
+  return std::make_unique<ast::LetNode>(varName, false,
+                                        ast::Type(ast::TypeInfo::INT, 0),
+                                        std::move(expr), nowLoc);
 }
 
 } // namespace ally

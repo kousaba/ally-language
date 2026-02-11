@@ -33,5 +33,6 @@ private:
   // Stmt
   std::unique_ptr<ast::ReturnNode> parseReturnStmt();
   std::unique_ptr<ast::BlockNode> parseBlock();
+  std::unique_ptr<ast::LetNode> parseLetStmt();
 };
 } // namespace ally

@@ -21,11 +21,13 @@ class LetNode : public StmtNode {
   bool isMutable;
   Type varType;
   std::unique_ptr<ExprNode> initExpr;
+  std::string varName;
 
 public:
-  LetNode(bool ismut, Type type, std::unique_ptr<ExprNode> init, Location loc)
-      : isMutable(ismut), varType(type), initExpr(std::move(init)),
-        StmtNode(NodeType::LET, loc) {}
+  LetNode(std::string name, bool ismut, Type type,
+          std::unique_ptr<ExprNode> init, Location loc)
+      : varName(std::move(name)), isMutable(ismut), varType(type),
+        initExpr(std::move(init)), StmtNode(NodeType::LET, loc) {}
   Node *analysis() override;
 };
 class BlockNode : public StmtNode {

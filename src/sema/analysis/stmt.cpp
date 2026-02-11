@@ -1,5 +1,6 @@
 #include "ally/ast/stmt.h"
 #include "ally/error/ErrorHandler.h"
+#include "ally/sema/Symbol.h"
 #include "ally/sema/SymbolTable.h"
 
 namespace ally::ast {
@@ -15,6 +16,9 @@ Node *ReturnNode::analysis() {
   return this;
 }
 Node *LetNode::analysis() {
+  if (sema::SymbolTable::getInstance().lookupSymbol(varName)) {
+    // TODO: 複数回定義
+  }
   if (initExpr) {
     auto node = initExpr->analysis();
     if (auto expr = dynamic_cast<ExprNode *>(node)) {
@@ -27,6 +31,8 @@ Node *LetNode::analysis() {
           error::Code::COM_SEM_EXPECTED_EXPR, {});
     }
   }
+  sema::SymbolTable::getInstance().addSymbol(
+      varName, sema::VarSymbol{varType, isMutable});
   return this;
 }
 Node *BlockNode::analysis() {

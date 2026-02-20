@@ -1,6 +1,4 @@
 #include "ally/error/ErrorMessage.h"
-#include "ally/error/ErrorCode.h"
-#include <iostream>
 
 namespace ally {
 namespace error {

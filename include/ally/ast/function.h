@@ -22,6 +22,9 @@ public:
   void firstAnalysis();
   void secondAnalysis();
   Node *analysis() override;
+  std::vector<Arg> getArgs() { return args; }
+  std::string getFunctionName() { return functionName; }
+  std::unique_ptr<BlockNode> getBlock() { return std::move(block); }
 };
 
 }; // namespace ally::ast

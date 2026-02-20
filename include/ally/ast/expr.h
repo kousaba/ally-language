@@ -25,5 +25,6 @@ public:
   NumberLiteralNode(int64_t number, Location loc)
       : number(number), ExprNode(NodeType::NUMBERLITERAL, loc) {}
   Node *analysis() override;
+  int64_t getNumber() { return number; }
 };
 } // namespace ally::ast

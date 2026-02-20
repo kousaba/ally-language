@@ -8,7 +8,7 @@ private:
   void firstPath();  // 関数登録
   void secondPath(); // 関数の中のもの
 public:
-  void analysis();
+  std::vector<std::unique_ptr<ast::FunctionNode>> analysis();
   SemanticAnalysis(std::vector<std::unique_ptr<ast::FunctionNode>> ast)
       : ast(std::move(ast)) {}
 };

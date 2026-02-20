@@ -1,7 +1,6 @@
 #pragma once
 #include "ally/ast/expr.h"
 #include "ally/ast/function.h"
-#include "ally/ast/other.h"
 #include "ally/ast/stmt.h"
 #include "ally/lexer/token.h"
 #include "ally/location.h"

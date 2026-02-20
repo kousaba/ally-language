@@ -3,10 +3,11 @@
 #include <iostream>
 
 namespace ally::sema {
-void SemanticAnalysis::analysis() {
+std::vector<std::unique_ptr<ast::FunctionNode>> SemanticAnalysis::analysis() {
   SymbolTable::getInstance().addScope();
   firstPath();
   secondPath();
+  return std::move(ast);
 }
 void SemanticAnalysis::firstPath() {
   for (size_t i = 0; i < ast.size(); i++) {

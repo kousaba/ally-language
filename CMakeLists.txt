@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 project(ally-lang)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS "-fsanitize=address")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 
 find_package(LLVM REQUIRED CONFIG)
 separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND "${LLVM_DEFINITIONS}")

@@ -1,6 +1,5 @@
 #pragma once
 #include "node/expr.h"
-#include "value.h"
 #include <memory>
 
 namespace ally::mir {
@@ -18,10 +17,10 @@ public:
 };
 
 class ReturnTerminator : public Terminator {
-  std::unique_ptr<Value> returnValue;
+  std::unique_ptr<ExprNode> returnValue;
 
 public:
-  ReturnTerminator(std::unique_ptr<Value> retVal)
+  ReturnTerminator(std::unique_ptr<ExprNode> retVal)
       : Terminator(TerminatorType::RETURN), returnValue(std::move(retVal)) {}
   void dump(int indent) override;
 };

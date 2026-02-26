@@ -13,12 +13,8 @@ int main(int argc, char *argv[]) {
       ally::error::Language::ja);
   std::string source = R"(
 fn calc(){
-  let a = 5
-  return 5
-}
-fn calc2(){
-  let b = 10
-  return 3
+  let a = (5 + 1) * 5;
+  return 5;
 }
   )";
   ally::Lexer lexer(source);
@@ -33,10 +29,11 @@ fn calc2(){
   ally::sema::SymbolTable::getInstance().dump();
   ally::mir::MIRBuilder mirBuilder(std::move(hir));
   auto mir = mirBuilder.build();
-  std::cout << "Function Count: " << mir.size() << std::endl;
   for (auto &func : mir) {
     func->dump();
   }
+  std::cout << source << std::endl;
+
   ally::error::ErrorHandler::getInstance().printAllErrors();
 
   return 0;

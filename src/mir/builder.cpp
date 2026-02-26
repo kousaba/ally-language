@@ -2,6 +2,7 @@
 #include "ally/ast/expr.h"
 #include "ally/ast/function.h"
 #include "ally/ast/other.h"
+#include "ally/mir/node/expr.h"
 #include <string>
 #include <vector>
 
@@ -58,21 +59,42 @@ std::vector<std::unique_ptr<Function>> MIRBuilder::build() {
   }
   return std::move(mir);
 }
-std::unique_ptr<Value> MIRBuilder::buildExpr(ast::ExprNode *expr) {
+std::unique_ptr<ExprNode> MIRBuilder::buildExpr(ast::ExprNode *expr) {
   if (!expr) {
     // TODO: Compiler Error: nullptrをbuildしようとした
   }
   if (auto numLiteral = dynamic_cast<ast::NumberLiteralNode *>(expr))
     return buildNumberLiteralExpr(numLiteral);
+  if (auto binaryop = dynamic_cast<ast::BinaryOpNode *>(expr))
+    return buildBinaryOp(binaryop);
   else {
     // TODO: Compiler Error: 不明なexpr
   }
   return nullptr;
 }
-std::unique_ptr<Value>
+std::unique_ptr<ExprNode>
 MIRBuilder::buildNumberLiteralExpr(ast::NumberLiteralNode *expr) {
-  return std::make_unique<ConstantValue>(ast::Type(ast::TypeInfo::INT),
-                                         expr->getNumber());
+  return std::make_unique<ValueNode>(std::make_unique<ConstantValue>(
+      ast::Type(ast::TypeInfo::INT), expr->getNumber()));
+}
+std::unique_ptr<ExprNode> MIRBuilder::buildBinaryOp(ast::BinaryOpNode *expr) {
+  // TODO
+  std::unique_ptr<ExprNode> lhs = buildExpr(expr->getLhs().get());
+  std::unique_ptr<ExprNode> rhs = buildExpr(expr->getRhs().get());
+  std::string opStr = expr->getOp();
+  BinaryOpNode::Op op;
+  if (opStr == "+")
+    op = BinaryOpNode::Op::ADD;
+  else if (opStr == "-")
+    op = BinaryOpNode::Op::SUB;
+  else if (opStr == "*")
+    op = BinaryOpNode::Op::MUL;
+  else if (opStr == "/")
+    op = BinaryOpNode::Op::DIV;
+  else {
+    // TODO: Compiler Error: 不明なopStr
+  }
+  return std::make_unique<BinaryOpNode>(std::move(lhs), std::move(rhs), op);
 }
 void MIRBuilder::buildStmt(ast::StmtNode *stmt) {
   if (!stmt) {
@@ -96,7 +118,7 @@ void MIRBuilder::buildLetStmt(ast::LetNode *stmt) {
   std::string newVarName = getNextVariableName(stmt->getVarName());
   ast::Type varType = stmt->getVarType();
   std::unique_ptr<ast::ExprNode> expr = stmt->getInitExpr();
-  std::unique_ptr<Value> val = buildExpr(expr.get());
+  std::unique_ptr<ExprNode> val = buildExpr(expr.get());
   if (!expr)
     std::cout << "Expr is null" << std::endl;
   if (!val)

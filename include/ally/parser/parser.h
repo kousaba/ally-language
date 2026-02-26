@@ -13,6 +13,11 @@ private:
   size_t pos;
   Location loc;
 
+  struct BindingPower {
+    int left;
+    int right;
+  };
+
 public:
   Parser(std::vector<Token> tokens) : source(tokens), loc() {}
   std::vector<std::unique_ptr<ast::FunctionNode>> parse();
@@ -25,10 +30,12 @@ private:
   bool match(TokenType type);
 
   std::unique_ptr<ast::FunctionNode> nextFunction();
-  std::unique_ptr<ast::ExprNode> parseExpr();
+  std::unique_ptr<ast::ExprNode> parseExpr(int min_bp = 0);
   std::unique_ptr<ast::StmtNode> parseStmt();
   // Expr
-  std::unique_ptr<ast::NumberLiteralNode> parseNumberLiteral();
+  bool isBinaryOp(Token token);
+  BindingPower getBindingPower(Token token);
+  std::unique_ptr<ast::ExprNode> parsePrimary();
   // Stmt
   std::unique_ptr<ast::ReturnNode> parseReturnStmt();
   std::unique_ptr<ast::BlockNode> parseBlock();

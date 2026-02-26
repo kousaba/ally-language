@@ -16,6 +16,10 @@ enum class TokenType {
   RBRACKET,
   EQ,
   UNKNOWN,
+  ADD,
+  SUB,
+  MUL,
+  DIV,
 };
 struct Token {
   TokenType type;

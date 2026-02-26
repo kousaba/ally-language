@@ -2,7 +2,7 @@
 #include <iostream>
 
 namespace ally::mir {
-enum class NodeType { UNKNOWN, ASSIGNMENT };
+enum class NodeType { UNKNOWN, ASSIGNMENT, BINARYOP, VALUE };
 class Node {
 private:
   NodeType type;

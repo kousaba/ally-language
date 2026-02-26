@@ -14,6 +14,7 @@ enum class NodeType {
   TYPE,
   FUNCTION,
   NUMBERLITERAL,
+  BINARYOP,
   RETURN,
   BLOCK,
   LET,

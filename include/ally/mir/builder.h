@@ -35,8 +35,10 @@ private:
   bool terminate(std::unique_ptr<Terminator> term);
   void setBlock(Block *b);
   void buildNextFunction(std::unique_ptr<ast::FunctionNode> func);
-  std::unique_ptr<Value> buildExpr(ast::ExprNode *expr);
-  std::unique_ptr<Value> buildNumberLiteralExpr(ast::NumberLiteralNode *expr);
+  std::unique_ptr<ExprNode> buildExpr(ast::ExprNode *expr);
+  std::unique_ptr<ExprNode>
+  buildNumberLiteralExpr(ast::NumberLiteralNode *expr);
+  std::unique_ptr<ExprNode> buildBinaryOp(ast::BinaryOpNode *expr);
   void buildStmt(ast::StmtNode *stmt);
   void buildReturnStmt(ast::ReturnNode *stmt);
   void buildLetStmt(ast::LetNode *stmt);

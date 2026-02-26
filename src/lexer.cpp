@@ -91,6 +91,14 @@ Token Lexer::parseSymbols() {
     return makeToken(TokenType::RBRACKET, "}");
   case '=':
     return makeToken(TokenType::EQ, "=");
+  case '+':
+    return makeToken(TokenType::ADD, "+");
+  case '-':
+    return makeToken(TokenType::SUB, "-");
+  case '*':
+    return makeToken(TokenType::MUL, "*");
+  case '/':
+    return makeToken(TokenType::DIV, "/");
   default:
     error::ErrorHandler::getInstance().report(
         error::Code::ERR_LEX_UNKNOWN_SYMBOL,
@@ -116,6 +124,10 @@ inline static std::map<TokenType, std::string> tokenTypeToName = {
     {TokenType::LBRACKET, "LBRACKET"},
     {TokenType::RBRACKET, "RBRACKET"},
     {TokenType::UNKNOWN, "UNKNOWN"},
+    {TokenType::ADD, "ADD"},
+    {TokenType::SUB, "SUB"},
+    {TokenType::MUL, "MUL"},
+    {TokenType::DIV, "DIV"},
 };
 void Lexer::printTokens() {
   pos = 0;

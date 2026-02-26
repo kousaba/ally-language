@@ -50,15 +50,62 @@ std::unique_ptr<ast::FunctionNode> Parser::nextFunction() {
                                              std::move(block), fnLocation);
 }
 
-std::unique_ptr<ast::ExprNode> Parser::parseExpr() {
-  if (peek().type == TokenType::NUMBER)
-    return parseNumberLiteral();
-  else {
-    error::ErrorHandler::getInstance().report(
-        error::Code::ERR_PAR_UNKNOWN_EXPR_TOKEN,
-        {std::to_string(loc.line), std::to_string(loc.column)});
-    return nullptr;
+bool Parser::isBinaryOp(Token token) {
+  TokenType type = token.type;
+  return type == TokenType::ADD || type == TokenType::SUB ||
+         type == TokenType::MUL || type == TokenType::DIV;
+}
+Parser::BindingPower Parser::getBindingPower(Token token) {
+  switch (token.type) {
+  case TokenType::ADD:
+  case TokenType::SUB:
+    return {110, 111};
+  case TokenType::MUL:
+  case TokenType::DIV:
+    return {120, 121};
+  default:
+    return {0, 0};
   }
+}
+std::unique_ptr<ast::ExprNode> Parser::parseExpr(int min_bp) {
+  auto lhs = parsePrimary();
+  if (!lhs)
+    return nullptr;
+  while (true) {
+    Token op_token = peek();
+    if (op_token.type == TokenType::UNKNOWN ||
+        op_token.type == TokenType::SEMI || op_token.type == TokenType::RPAREN)
+      break;
+    BindingPower bp = getBindingPower(op_token);
+    if (bp.left < min_bp)
+      break;
+    advance();
+    Location now_loc = op_token.loc;
+    auto rhs = parseExpr(bp.right);
+    if (!rhs) {
+      return nullptr;
+    }
+    lhs = std::make_unique<ast::BinaryOpNode>(std::move(lhs), op_token.value,
+                                              std::move(rhs), loc);
+  }
+  return lhs;
+}
+std::unique_ptr<ast::ExprNode> Parser::parsePrimary() {
+  if (peek().type == TokenType::LPAREN) {
+    advance();
+    auto expr = parseExpr(0);
+    if (!expr || peek().type != TokenType::RPAREN) {
+      return nullptr;
+    }
+    advance();
+    return expr;
+  }
+  if (peek().type == TokenType::NUMBER) {
+    Location nowLoc = loc;
+    std::string value = advance().value;
+    return std::make_unique<ast::NumberLiteralNode>(std::stol(value), nowLoc);
+  }
+  return nullptr;
 }
 
 std::unique_ptr<ast::StmtNode> Parser::parseStmt() {
@@ -76,18 +123,13 @@ std::unique_ptr<ast::StmtNode> Parser::parseStmt() {
   }
 }
 
-std::unique_ptr<ast::NumberLiteralNode> Parser::parseNumberLiteral() {
-  Location nowLoc = loc;
-  std::string value = advance().value;
-  return std::make_unique<ast::NumberLiteralNode>(std::stol(value), nowLoc);
-}
-
 std::unique_ptr<ast::ReturnNode> Parser::parseReturnStmt() {
   Location nowLoc = loc;
   if (!match(TokenType::RETURN)) {
     // TODO: エラー
   }
   auto expr = parseExpr();
+  match(TokenType::SEMI);
   return std::make_unique<ast::ReturnNode>(std::move(expr), nowLoc);
 }
 
@@ -117,6 +159,7 @@ std::unique_ptr<ast::LetNode> Parser::parseLetStmt() {
   if (match(TokenType::EQ)) {
     expr = parseExpr();
   }
+  match(TokenType::SEMI);
   return std::make_unique<ast::LetNode>(varName, false,
                                         ast::Type(ast::TypeInfo::INT, 0),
                                         std::move(expr), nowLoc);

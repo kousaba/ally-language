@@ -1,6 +1,6 @@
 #pragma once
 #include "ally/ast/other.h"
-#include "ally/mir/value.h"
+#include "ally/mir/node/expr.h"
 #include "base.h"
 #include <memory>
 #include <string>
@@ -14,11 +14,11 @@ public:
 class AssignmentNode : public StmtNode {
   std::string varName;
   ast::Type varType;
-  std::unique_ptr<Value> value;
+  std::unique_ptr<ExprNode> value;
 
 public:
   AssignmentNode(std::string var, ast::Type varType,
-                 std::unique_ptr<Value> val);
+                 std::unique_ptr<ExprNode> val);
   void dump(int indent) override;
 };
 } // namespace ally::mir

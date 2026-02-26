@@ -44,4 +44,14 @@ public:
   std::unique_ptr<ExprNode> getRhs() { return std::move(rhs); }
   std::string getOp() { return op; }
 };
+
+class VariableRefNode : public ExprNode {
+  std::string varName;
+
+public:
+  VariableRefNode(std::string name, Location loc)
+      : ExprNode(NodeType::VARREF, loc), varName(std::move(name)) {}
+  Node *analysis() override;
+  std::string getVarName() { return varName; }
+};
 } // namespace ally::ast

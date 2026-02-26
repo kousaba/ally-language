@@ -4,7 +4,6 @@
 #include "ally/ast/stmt.h"
 #include "function.h"
 #include "symboltable.h"
-#include "value.h"
 #include <map>
 #include <vector>
 
@@ -25,6 +24,7 @@ private:
   SymbolTable *topScope();
   std::string getNextConstantName();
   std::string getNextVariableName(std::string varName);
+  std::string getNowVariableName(std::string varName);
   Function *createFunction(std::string name, ast::Type type,
                            std::vector<Arg> args);
   Block *createBlock(std::string name);
@@ -39,6 +39,7 @@ private:
   std::unique_ptr<ExprNode>
   buildNumberLiteralExpr(ast::NumberLiteralNode *expr);
   std::unique_ptr<ExprNode> buildBinaryOp(ast::BinaryOpNode *expr);
+  std::unique_ptr<ExprNode> buildVariableRef(ast::VariableRefNode *expr);
   void buildStmt(ast::StmtNode *stmt);
   void buildReturnStmt(ast::ReturnNode *stmt);
   void buildLetStmt(ast::LetNode *stmt);

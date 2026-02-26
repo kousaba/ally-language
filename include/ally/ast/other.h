@@ -18,6 +18,7 @@ enum class NodeType {
   RETURN,
   BLOCK,
   LET,
+  VARREF,
 };
 class Node {
   NodeType nodeType;

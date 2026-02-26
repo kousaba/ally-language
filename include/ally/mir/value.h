@@ -29,4 +29,14 @@ public:
   void dump(int indent) override;
   ValueType getValue() { return value; }
 };
+
+class VariableValue : public Value {
+  std::string varName;
+
+public:
+  VariableValue(ast::Type t, std::string name)
+      : Value(t, name), varName(std::move(name)) {}
+  void dump(int indent) override;
+  std::string getVarName() { return varName; }
+};
 } // namespace ally::mir

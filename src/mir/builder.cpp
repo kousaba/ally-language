@@ -23,7 +23,10 @@ std::string MIRBuilder::getNextConstantName() {
   return "_A_Constant_" + std::to_string(constantCount++);
 }
 std::string MIRBuilder::getNextVariableName(std::string varName) {
-  return "_A_Var_" + varName + std::to_string(varNameCount[varName]++);
+  return "_A_Var_" + varName + std::to_string(++varNameCount[varName]);
+}
+std::string MIRBuilder::getNowVariableName(std::string varName) {
+  return "_A_Var_" + varName + std::to_string(varNameCount[varName]);
 }
 Function *MIRBuilder::createFunction(std::string name, ast::Type retType,
                                      std::vector<Arg> arg) {
@@ -65,8 +68,10 @@ std::unique_ptr<ExprNode> MIRBuilder::buildExpr(ast::ExprNode *expr) {
   }
   if (auto numLiteral = dynamic_cast<ast::NumberLiteralNode *>(expr))
     return buildNumberLiteralExpr(numLiteral);
-  if (auto binaryop = dynamic_cast<ast::BinaryOpNode *>(expr))
+  else if (auto binaryop = dynamic_cast<ast::BinaryOpNode *>(expr))
     return buildBinaryOp(binaryop);
+  else if (auto var = dynamic_cast<ast::VariableRefNode *>(expr))
+    return buildVariableRef(var);
   else {
     // TODO: Compiler Error: 不明なexpr
   }
@@ -95,6 +100,11 @@ std::unique_ptr<ExprNode> MIRBuilder::buildBinaryOp(ast::BinaryOpNode *expr) {
     // TODO: Compiler Error: 不明なopStr
   }
   return std::make_unique<BinaryOpNode>(std::move(lhs), std::move(rhs), op);
+}
+std::unique_ptr<ExprNode>
+MIRBuilder::buildVariableRef(ast::VariableRefNode *expr) {
+  return std::make_unique<ValueNode>(std::make_unique<VariableValue>(
+      ast::Type(expr->getType()), getNowVariableName(expr->getVarName())));
 }
 void MIRBuilder::buildStmt(ast::StmtNode *stmt) {
   if (!stmt) {

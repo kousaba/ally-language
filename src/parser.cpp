@@ -105,6 +105,11 @@ std::unique_ptr<ast::ExprNode> Parser::parsePrimary() {
     std::string value = advance().value;
     return std::make_unique<ast::NumberLiteralNode>(std::stol(value), nowLoc);
   }
+  if (peek().type == TokenType::IDENTIFIER) {
+    Location nowLoc = loc;
+    std::string name = advance().value;
+    return std::make_unique<ast::VariableRefNode>(std::move(name), nowLoc);
+  }
   return nullptr;
 }
 

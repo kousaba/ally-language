@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
   std::string source = R"(
 fn calc(){
   let a = (5 + 1) * 5;
-  return 5;
+  return a;
 }
   )";
   ally::Lexer lexer(source);
@@ -32,6 +32,7 @@ fn calc(){
   for (auto &func : mir) {
     func->dump();
   }
+  std::cout << std::endl << "Source: ";
   std::cout << source << std::endl;
 
   ally::error::ErrorHandler::getInstance().printAllErrors();

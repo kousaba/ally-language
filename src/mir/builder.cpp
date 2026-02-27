@@ -96,6 +96,18 @@ std::unique_ptr<ExprNode> MIRBuilder::buildBinaryOp(ast::BinaryOpNode *expr) {
     op = BinaryOpNode::Op::MUL;
   else if (opStr == "/")
     op = BinaryOpNode::Op::DIV;
+  else if (opStr == "==")
+    op = BinaryOpNode::Op::EQEQ;
+  else if (opStr == "!=")
+    op = BinaryOpNode::Op::NEQ;
+  else if (opStr == "<")
+    op = BinaryOpNode::Op::LT;
+  else if (opStr == "<=")
+    op = BinaryOpNode::Op::LTE;
+  else if (opStr == ">")
+    op = BinaryOpNode::Op::GT;
+  else if (opStr == ">=")
+    op = BinaryOpNode::Op::LTE;
   else {
     // TODO: Compiler Error: 不明なopStr
   }

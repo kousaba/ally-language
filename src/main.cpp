@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
       ally::error::Language::ja);
   std::string source = R"(
 fn calc(){
-  let a = (5 + 1) * 5;
+  let a = (5 + 1) >= 5;
   return a;
 }
   )";

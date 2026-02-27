@@ -63,6 +63,14 @@ Parser::BindingPower Parser::getBindingPower(Token token) {
   case TokenType::MUL:
   case TokenType::DIV:
     return {120, 121};
+  case TokenType::EQEQ:
+  case TokenType::NEQ:
+    return {200, 201};
+  case TokenType::LT:
+  case TokenType::LTE:
+  case TokenType::GT:
+  case TokenType::GTE:
+    return {210, 211};
   default:
     return {0, 0};
   }

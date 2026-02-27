@@ -25,8 +25,21 @@ std::string BinaryOpNode::getOpName() {
     return "MUL";
   case Op::DIV:
     return "DIV";
+  case Op::LT:
+    return "LT";
+  case Op::LTE:
+    return "LTE";
+  case Op::GT:
+    return "GT";
+  case Op::GTE:
+    return "GTE";
+  case Op::EQEQ:
+    return "EQEQ";
+  case Op::NEQ:
+    return "NEQ";
+  default:
+    return "Unknown Op";
   }
-  return "UNKNOWN OP";
 }
 void BinaryOpNode::dump(int indent) {
   printIndent(indent);

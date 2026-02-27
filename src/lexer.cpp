@@ -90,6 +90,10 @@ Token Lexer::parseSymbols() {
   case '}':
     return makeToken(TokenType::RBRACKET, "}");
   case '=':
+    if (peek() == '=') {
+      advance();
+      return makeToken(TokenType::EQEQ, "==");
+    }
     return makeToken(TokenType::EQ, "=");
   case '+':
     return makeToken(TokenType::ADD, "+");
@@ -99,6 +103,24 @@ Token Lexer::parseSymbols() {
     return makeToken(TokenType::MUL, "*");
   case '/':
     return makeToken(TokenType::DIV, "/");
+  case '<':
+    if (peek() == '=') {
+      advance();
+      return makeToken(TokenType::GTE, "<=");
+    }
+    return makeToken(TokenType::GT, "<");
+  case '>':
+    if (peek() == '=') {
+      advance();
+      return makeToken(TokenType::LTE, ">=");
+    }
+    return makeToken(TokenType::LT, ">");
+  case '!':
+    if (peek() == '=') {
+      advance();
+      return makeToken(TokenType::NEQ, "!=");
+    }
+    return makeToken(TokenType::UNKNOWN, "!");
   default:
     error::ErrorHandler::getInstance().report(
         error::Code::ERR_LEX_UNKNOWN_SYMBOL,
@@ -128,7 +150,12 @@ inline static std::map<TokenType, std::string> tokenTypeToName = {
     {TokenType::SUB, "SUB"},
     {TokenType::MUL, "MUL"},
     {TokenType::DIV, "DIV"},
-};
+    {TokenType::GT, "GT"},
+    {TokenType::GTE, "GTE"},
+    {TokenType::LT, "LT"},
+    {TokenType::LTE, "LTE"},
+    {TokenType::EQEQ, "EQEQ"},
+    {TokenType::NEQ, "NEQ"}};
 void Lexer::printTokens() {
   pos = 0;
   loc.line = 0;

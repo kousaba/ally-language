@@ -20,6 +20,12 @@ enum class TokenType {
   SUB,
   MUL,
   DIV,
+  GT,
+  GTE,
+  LT,
+  LTE,
+  EQEQ,
+  NEQ,
 };
 struct Token {
   TokenType type;

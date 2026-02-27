@@ -18,7 +18,7 @@ public:
 };
 class BinaryOpNode : public ExprNode {
 public:
-  enum class Op { ADD, SUB, MUL, DIV };
+  enum class Op { ADD, SUB, MUL, DIV, EQEQ, NEQ, LT, LTE, GT, GTE };
 
 private:
   std::unique_ptr<ExprNode> lhs;

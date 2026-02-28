@@ -15,7 +15,7 @@ class ErrorMessageManager {
 private:
   ErrorMessageManager();
   ~ErrorMessageManager() {}
-  void addMessage(Code code, Message message);
+  void addMessage(Code code, std::string en, std::string ja);
   std::map<Code, Message> messages;
   Language language;
 

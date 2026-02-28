@@ -19,9 +19,6 @@ void SemanticAnalysis::firstPath() {
               << std::endl;
     ast[i]->firstAnalysis();
   }
-  /*for (auto &&a : ast) {
-    a->firstAnalysis();
-  }*/
 }
 void SemanticAnalysis::secondPath() {
   for (auto &&a : ast) {

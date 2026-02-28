@@ -19,6 +19,7 @@ std::vector<Token> Lexer::tokenize() {
       tokens.push_back(*result);
     }
   }
+  tokens.push_back(makeToken(TokenType::UNKNOWN, "EOF"));
   return tokens;
 }
 

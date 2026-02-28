@@ -1,5 +1,6 @@
 #pragma once
 #include "ally/location.h"
+#include <iostream>
 namespace ally::ast {
 enum class TypeInfo { INT, I32, I16, FLOAT, F32, F16, UNKNOWN };
 
@@ -27,6 +28,9 @@ class Node {
 public:
   Node(NodeType type, Location loc) : nodeType(type), loc(loc) {}
   virtual ~Node() = default;
+  virtual void dump(int indent) = 0;
   virtual Node *analysis() = 0;
 };
+
+void printIndent(int indent);
 } // namespace ally::ast

@@ -13,8 +13,7 @@ int main(int argc, char *argv[]) {
       ally::error::Language::ja);
   std::string source = R"(
 fn calc(){
-  let a = (5 + 1) >= 5;
-  return a;
+  return 5;
 }
   )";
   ally::Lexer lexer(source);
@@ -23,6 +22,9 @@ fn calc(){
   ally::Parser parser(tokens);
   std::cout << "Parser parsing...." << std::endl;
   auto ast = parser.parse();
+  std::cout << "AST Func count: " << ast.size() << std::endl;
+  for (auto &i : ast)
+    i->dump(0);
   std::cout << "Semantic anaylsis...." << std::endl;
   ally::sema::SemanticAnalysis sema(std::move(ast));
   auto hir = sema.analysis();

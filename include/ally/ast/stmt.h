@@ -17,6 +17,7 @@ public:
       : value(std::move(value)), StmtNode(NodeType::RETURN, loc) {}
   Node *analysis() override;
   std::unique_ptr<ExprNode> getValue() { return std::move(value); }
+  void dump(int indent) override;
 };
 class LetNode : public StmtNode {
   bool isMutable;
@@ -34,6 +35,7 @@ public:
   Type getVarType() { return varType; }
   std::unique_ptr<ExprNode> getInitExpr() { return std::move(initExpr); }
   std::string getVarName() { return varName; }
+  void dump(int indent) override;
 };
 class BlockNode : public StmtNode {
   std::vector<std::unique_ptr<StmtNode>> statements;
@@ -45,6 +47,7 @@ public:
   std::vector<std::unique_ptr<StmtNode>> getStatements() {
     return std::move(statements);
   }
+  void dump(int indent) override;
 };
 
 } // namespace ally::ast

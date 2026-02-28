@@ -1,6 +1,6 @@
 #include "ally/ast/expr.h"
+#include "ally/error/ErrorHandler.h"
 #include "ally/sema/SymbolTable.h"
-#include <iostream>
 
 namespace ally::ast {
 
@@ -16,8 +16,8 @@ Node *VariableRefNode::analysis() {
   if (sema::Symbol symbol =
           sema::SymbolTable::getInstance().lookupSymbol(varName)) {
     if (symbol.type != sema::SymbolType::VAR) {
-      // TODO: Error 変数ではない
-      std::cerr << "Not variable: " << varName << std::endl;
+      error::ErrorHandler::getInstance().report(
+          error::Code::ERR_SEM_SYMBOL_IS_NOT_VAR, {varName});
       return nullptr;
     }
     if (auto varSymbol = std::get_if<sema::VarSymbol>(&symbol.symbol)) {

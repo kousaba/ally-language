@@ -27,6 +27,7 @@ public:
       : number(number), ExprNode(NodeType::NUMBERLITERAL, loc) {}
   Node *analysis() override;
   int64_t getNumber() { return number; }
+  void dump(int indent) override;
 };
 
 class BinaryOpNode : public ExprNode {
@@ -43,6 +44,7 @@ public:
   std::unique_ptr<ExprNode> getLhs() { return std::move(lhs); }
   std::unique_ptr<ExprNode> getRhs() { return std::move(rhs); }
   std::string getOp() { return op; }
+  void dump(int indent) override;
 };
 
 class VariableRefNode : public ExprNode {
@@ -53,5 +55,6 @@ public:
       : ExprNode(NodeType::VARREF, loc), varName(std::move(name)) {}
   Node *analysis() override;
   std::string getVarName() { return varName; }
+  void dump(int indent) override;
 };
 } // namespace ally::ast

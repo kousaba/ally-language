@@ -2,6 +2,8 @@
 #include "ally/ast/expr.h"
 #include "ally/ast/function.h"
 #include "ally/ast/other.h"
+#include "ally/error/ErrorCode.h"
+#include "ally/error/ErrorHandler.h"
 #include "ally/mir/node/expr.h"
 #include <string>
 #include <vector>
@@ -12,8 +14,8 @@ void MIRBuilder::addScope() {
 }
 void MIRBuilder::removeScope() {
   if (scopes.size() <= 1) {
-    // Compiler Error:
-    // スコープに入っていない状態でスコープを抜けようとしている(グローバルスコープは残す)
+    error::ErrorHandler::getInstance().report(
+        error::Code::COM_MIR_NO_SCOPE_AVAILABLE, {});
     return;
   }
   scopes.pop_back();
@@ -64,7 +66,8 @@ std::vector<std::unique_ptr<Function>> MIRBuilder::build() {
 }
 std::unique_ptr<ExprNode> MIRBuilder::buildExpr(ast::ExprNode *expr) {
   if (!expr) {
-    // TODO: Compiler Error: nullptrをbuildしようとした
+    error::ErrorHandler::getInstance().report(error::Code::COM_MIR_EXPR_IS_NULL,
+                                              {});
   }
   if (auto numLiteral = dynamic_cast<ast::NumberLiteralNode *>(expr))
     return buildNumberLiteralExpr(numLiteral);
@@ -73,7 +76,8 @@ std::unique_ptr<ExprNode> MIRBuilder::buildExpr(ast::ExprNode *expr) {
   else if (auto var = dynamic_cast<ast::VariableRefNode *>(expr))
     return buildVariableRef(var);
   else {
-    // TODO: Compiler Error: 不明なexpr
+    error::ErrorHandler::getInstance().report(error::Code::COM_MIR_UNKNOWN_EXPR,
+                                              {});
   }
   return nullptr;
 }
@@ -109,6 +113,8 @@ std::unique_ptr<ExprNode> MIRBuilder::buildBinaryOp(ast::BinaryOpNode *expr) {
   else if (opStr == ">=")
     op = BinaryOpNode::Op::LTE;
   else {
+    error::ErrorHandler::getInstance().report(
+        error::Code::COM_MIR_UNKNOWN_OPSTR, {opStr});
     // TODO: Compiler Error: 不明なopStr
   }
   return std::make_unique<BinaryOpNode>(std::move(lhs), std::move(rhs), op);
@@ -120,7 +126,8 @@ MIRBuilder::buildVariableRef(ast::VariableRefNode *expr) {
 }
 void MIRBuilder::buildStmt(ast::StmtNode *stmt) {
   if (!stmt) {
-    // TODO: Compiler Error: nullptrをbuildしようとした
+    error::ErrorHandler::getInstance().report(error::Code::COM_MIR_STMT_IS_NULL,
+                                              {});
   }
   if (auto *ret = dynamic_cast<ast::ReturnNode *>(stmt))
     buildReturnStmt(ret);
@@ -129,7 +136,8 @@ void MIRBuilder::buildStmt(ast::StmtNode *stmt) {
   else if (auto *block = dynamic_cast<ast::BlockNode *>(stmt))
     buildBlock(block);
   else {
-    // TODO: Compiler Error: 不明なstmt
+    error::ErrorHandler::getInstance().report(error::Code::COM_MIR_UNKNOWN_STMT,
+                                              {});
   }
 }
 void MIRBuilder::buildReturnStmt(ast::ReturnNode *stmt) {
@@ -141,10 +149,6 @@ void MIRBuilder::buildLetStmt(ast::LetNode *stmt) {
   ast::Type varType = stmt->getVarType();
   std::unique_ptr<ast::ExprNode> expr = stmt->getInitExpr();
   std::unique_ptr<ExprNode> val = buildExpr(expr.get());
-  if (!expr)
-    std::cout << "Expr is null" << std::endl;
-  if (!val)
-    std::cout << "Val is null" << std::endl;
   insert(std::make_unique<AssignmentNode>(newVarName, varType, std::move(val)));
 }
 void MIRBuilder::buildBlock(ast::BlockNode *block) {

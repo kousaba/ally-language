@@ -1,4 +1,5 @@
 #include "ally/sema/SymbolTable.h"
+#include "ally/error/ErrorHandler.h"
 #include <iostream>
 
 namespace ally::sema {
@@ -13,7 +14,8 @@ Symbol SymbolTable::lookupSymbol(std::string name) const {
 bool SymbolTable::addSymbol(std::string name, Symbol symbol) {
   // TODO: ErrorHandlerを使う
   if (symbols.empty()) {
-    std::cerr << "Error: No scope available!" << std::endl;
+    error::ErrorHandler::getInstance().report(
+        error::Code::COM_SEM_NO_SCOPE_AVAILABLE, {});
     return false;
   }
   if (lookupSymbol(name).type != SymbolType::UNKNOWN) {

@@ -17,14 +17,16 @@ Node *ReturnNode::analysis() {
 }
 Node *LetNode::analysis() {
   if (sema::SymbolTable::getInstance().lookupSymbol(varName)) {
-    // TODO: 複数回定義
+    error::ErrorHandler::getInstance().report(
+        error::Code::ERR_SEM_VAR_MULTIPLE_DEFINED, {varName});
   }
   if (initExpr) {
     auto node = initExpr->analysis();
     if (auto expr = dynamic_cast<ExprNode *>(node)) {
       Type initType = expr->getType();
       if (varType != initType) {
-        // TODO: initTypeの型とvarTypeの型が一致しません
+        error::ErrorHandler::getInstance().report(
+            error::Code::ERR_SEM_VAR_NOT_MATCH_VALUE_TYPE, {varName});
       }
     } else {
       error::ErrorHandler::getInstance().report(

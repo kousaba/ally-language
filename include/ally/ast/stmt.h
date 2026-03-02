@@ -49,5 +49,19 @@ public:
   }
   void dump(int indent) override;
 };
+class IfNode : public StmtNode{
+  std::unique_ptr<StmtNode> thenB;
+  std::unique_ptr<StmtNode> elseB;
+  std::unique_ptr<ExprNode> cond;
+public:
+  IfNode(std::unique_ptr<StmtNode> thenBranch, std::unique_ptr<StmtNode> elseBranch, std::unique_ptr<ExprNode> condition, Location loc)
+    : StmtNode(NodeType::IF, loc), thenB(std::move(thenBranch)), elseB(std::move(elseBranch)), cond(std::move(condition)) {}
+  Node *analysis() override;
+  std::unique_ptr<StmtNode> getThenBranch() { return std::move(thenB); }
+  std::unique_ptr<StmtNode> getElseBranch() { return std::move(elseB); }
+  std::unique_ptr<ExprNode> getCondition() { return std::move(cond); }
+  bool hasElse() { return bool(elseB); }
+  void dump(int indent) override;
+};
 
 } // namespace ally::ast

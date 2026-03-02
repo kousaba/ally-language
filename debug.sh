@@ -15,6 +15,8 @@ if [ "$exit_code" -eq 0 ]; then
   echo "Successfully compleated."
   exit 0
 elif [ "$exit_code" -eq 139 ] || [ "$exit_code" -eq 134 ]; then
+  clear
+  echo "Exit Code: $exit_code"
   [ "$exit_code" -eq 139 ] && echo "Detected SIGSEGV"
   [ "$exit_code" -eq 134 ] && echo "Detected ABORT (ASan memory conflict?)"
   echo "Starting Debug Compiling with ASan..."
@@ -34,5 +36,7 @@ elif [ "$exit_code" -eq 139 ] || [ "$exit_code" -eq 134 ]; then
     -ex "quit" \
     ./build/ally-lang
 else 
+  clear
+  echo "Exit Code: $exit_code"
   echo "Terminated with unexpected exit code: $exit_code"
 fi

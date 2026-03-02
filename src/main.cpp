@@ -13,7 +13,11 @@ int main(int argc, char *argv[]) {
       ally::error::Language::ja);
   std::string source = R"(
 fn calc(){
-  return 5;
+  let a = 5;
+  if a >= 5 {
+    let b = 5;
+  } 
+  return a;
 }
   )";
   ally::Lexer lexer(source);
@@ -28,6 +32,10 @@ fn calc(){
   std::cout << "Semantic anaylsis...." << std::endl;
   ally::sema::SemanticAnalysis sema(std::move(ast));
   auto hir = sema.analysis();
+  std::cout << "Hir Func count: " << hir.size() << std::endl;
+  std::cout << "HIR Dump... " << std::endl;
+  for (auto &i : hir)
+    i->dump(0);
   ally::sema::SymbolTable::getInstance().dump();
   ally::mir::MIRBuilder mirBuilder(std::move(hir));
   auto mir = mirBuilder.build();

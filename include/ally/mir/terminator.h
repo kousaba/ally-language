@@ -1,21 +1,10 @@
 #pragma once
 #include "node/expr.h"
+#include "baseterm.h"
+#include "block.h"
 #include <memory>
 
 namespace ally::mir {
-class Block;
-enum class TerminatorType { RETURN, JUMP, IF, UNREACHABLE };
-class Terminator {
-protected:
-  TerminatorType type;
-
-public:
-  TerminatorType getType() { return type; }
-  Terminator(TerminatorType type) : type(type) {}
-  virtual ~Terminator() = default;
-  virtual void dump(int indent) = 0;
-};
-
 class ReturnTerminator : public Terminator {
   std::unique_ptr<ExprNode> returnValue;
 

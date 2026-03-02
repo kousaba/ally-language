@@ -4,36 +4,44 @@
 namespace ally::ast {
 void ReturnNode::dump(int indent) {
   printIndent(indent);
-  std::cout << "ReturnNode: (" << std::endl;
+  std::cout << "ReturnNode: " << std::endl;
   printIndent(indent + 1);
-  std::cout << "Value: (" << std::endl;
+  std::cout << "Value: " << std::endl;
   value->dump(indent + 2);
-  printIndent(indent + 1);
-  std::cout << ")" << std::endl;
-  printIndent(indent);
-  std::cout << ")" << std::endl;
 }
 void LetNode::dump(int indent) {
   printIndent(indent);
-  std::cout << "LetNode: (" << std::endl;
+  std::cout << "LetNode: " << std::endl;
   printIndent(indent + 1);
   std::cout << "VarName: " << varName << std::endl;
   printIndent(indent + 1);
-  std::cout << "init: (" << std::endl;
+  std::cout << "init: " << std::endl;
   if (initExpr)
     initExpr->dump(indent + 2);
-  printIndent(indent + 1);
-  std::cout << ")" << std::endl;
-  printIndent(indent);
-  std::cout << ")" << std::endl;
 }
 void BlockNode::dump(int indent) {
   printIndent(indent);
-  std::cout << "BlockNode: (" << std::endl;
+  std::cout << "BlockNode: " << std::endl;
   for (auto &i : statements) {
     i->dump(indent + 1);
   }
+}
+void IfNode::dump(int indent) {
   printIndent(indent);
-  std::cout << ")" << std::endl;
+  std::cout << "IfNode: " << std::endl;
+  printIndent(indent + 1);
+  std::cout << "Condition: " << std::endl;
+  cond->dump(indent + 2);
+  printIndent(indent + 1);
+  std::cout << "thenB: " << std::endl;
+  thenB->dump(indent + 2);
+  printIndent(indent + 1);
+  std::cout << "elseB: " << std::endl;
+  if (elseB)
+    elseB->dump(indent + 2);
+  else {
+    printIndent(indent + 2);
+    std::cout << "nullptr" << std::endl;
+  }
 }
 } // namespace ally::ast

@@ -1,4 +1,5 @@
 #include "ally/ast/other.h"
+#include <iostream>
 
 namespace ally::ast {
 void printIndent(int indent) {

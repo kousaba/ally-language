@@ -21,4 +21,19 @@ public:
                  std::unique_ptr<ExprNode> val);
   void dump(int indent) override;
 };
+class AllocaNode : public StmtNode{
+  std::string varName;
+  ast::Type type;
+public:
+  AllocaNode(std::string var, ast::Type t);
+  void dump(int indent) override;
+};
+class StoreNode : public StmtNode{
+  std::string varName;
+  std::unique_ptr<ExprNode> value;
+public:
+  StoreNode(std::string var, std::unique_ptr<ExprNode> expr);
+  void dump(int indent) override;
+};
+
 } // namespace ally::mir

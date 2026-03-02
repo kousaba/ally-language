@@ -17,6 +17,7 @@ class MIRBuilder {
   std::map<std::string, int> blockCount;
   std::vector<std::unique_ptr<SymbolTable>> scopes;
   std::vector<std::unique_ptr<Function>> mir;
+  std::vector<std::unique_ptr<AllocaNode>> allocaNodes;
 
 private:
   void addScope();
@@ -32,6 +33,8 @@ private:
   void setFunction(Function *f);
   void insert(std::unique_ptr<StmtNode> stmt);
   void insert(std::vector<std::unique_ptr<StmtNode>> stmts);
+  void insertAlloca(std::unique_ptr<AllocaNode> alloca);
+  void insertAlloca(std::string name, ast::Type t);
   bool terminate(std::unique_ptr<Terminator> term);
   void setBlock(Block *b);
   void buildNextFunction(std::unique_ptr<ast::FunctionNode> func);
@@ -44,6 +47,7 @@ private:
   void buildReturnStmt(ast::ReturnNode *stmt);
   void buildLetStmt(ast::LetNode *stmt);
   void buildBlock(ast::BlockNode *block);
+  void buildIfStmt(ast::IfNode *stmt);
 
 public:
   MIRBuilder(std::vector<std::unique_ptr<ast::FunctionNode>> funcs)

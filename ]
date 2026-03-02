@@ -11,19 +11,17 @@ void ReturnTerminator::dump(int indent) {
 }
 void JumpTerminator::dump(int indent) {
   printIndent(indent);
-  std::cout << "JumpTerm: to " << to->getBlockName() << std::endl;
+  std::cout << "JumpTerm" << std::endl;
 }
 void IfTerminator::dump(int indent) {
   printIndent(indent);
   std::cout << "IfTerminator: (" << std::endl;
   cond->dump(indent + 1);
-  printIndent(indent + 1);
   std::cout << "Then: " << thenB->getBlockName() << std::endl;
   if (elseB) {
-    printIndent(indent + 1);
+    cond->dump(indent + 1);
     std::cout << "Else: " << elseB->getBlockName() << std::endl;
   }
-  printIndent(indent);
   std::cout << ")" << std::endl;
 }
 void UnreachableTerminator::dump(int indent) {

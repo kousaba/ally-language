@@ -45,4 +45,14 @@ Node *BlockNode::analysis() {
   sema::SymbolTable::getInstance().removeScope();
   return this;
 }
+Node *IfNode::analysis() {
+  if (this->cond) {
+    auto node = cond->analysis();
+  }
+  thenB->analysis();
+  if (elseB) {
+    elseB->analysis();
+  }
+  return this;
+}
 } // namespace ally::ast

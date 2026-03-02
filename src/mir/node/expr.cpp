@@ -8,6 +8,8 @@ BinaryOpNode::BinaryOpNode(std::unique_ptr<ExprNode> lhs,
       op(op) {}
 ValueNode::ValueNode(std::unique_ptr<Value> val)
     : ExprNode(NodeType::VALUE), val(std::move(val)) {}
+LoadNode::LoadNode(std::string var, ast::Type t)
+    : ExprNode(NodeType::LOAD), varName(std::move(var)), type(t) {}
 void ValueNode::dump(int indent) {
   printIndent(indent);
   std::cout << "ValueNode(" << std::endl;
@@ -48,6 +50,14 @@ void BinaryOpNode::dump(int indent) {
   std::cout << "Op: " << getOpName() << std::endl;
   lhs->dump(indent + 1);
   rhs->dump(indent + 1);
+  printIndent(indent);
+  std::cout << ")" << std::endl;
+}
+void LoadNode::dump(int indent) {
+  printIndent(indent);
+  std::cout << "LoadNode(" << std::endl;
+  printIndent(indent + 1);
+  std::cout << "Var: " << varName << std::endl;
   printIndent(indent);
   std::cout << ")" << std::endl;
 }

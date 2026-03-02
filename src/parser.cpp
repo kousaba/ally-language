@@ -67,7 +67,10 @@ std::unique_ptr<ast::FunctionNode> Parser::nextFunction() {
 bool Parser::isBinaryOp(Token token) {
   TokenType type = token.type;
   return type == TokenType::ADD || type == TokenType::SUB ||
-         type == TokenType::MUL || type == TokenType::DIV;
+         type == TokenType::MUL || type == TokenType::DIV ||
+         type == TokenType::EQEQ || type == TokenType::NEQ ||
+         type == TokenType::LT || type == TokenType::LTE ||
+         type == TokenType::GT || type == TokenType::GTE;
 }
 Parser::BindingPower Parser::getBindingPower(Token token) {
   switch (token.type) {
@@ -95,6 +98,8 @@ std::unique_ptr<ast::ExprNode> Parser::parseExpr(int min_bp) {
     return nullptr;
   while (true) {
     Token op_token = peek();
+    if (!isBinaryOp(op_token))
+      break;
     if (op_token.type == TokenType::UNKNOWN ||
         op_token.type == TokenType::SEMI || op_token.type == TokenType::RPAREN)
       break;
@@ -143,6 +148,8 @@ std::unique_ptr<ast::StmtNode> Parser::parseStmt() {
     return parseReturnStmt();
   else if (type == TokenType::LET)
     return parseLetStmt();
+  else if (type == TokenType::IF)
+    return parseIfStmt();
   else {
     error::ErrorHandler::getInstance().report(
         error::Code::ERR_PAR_UNKNOWN_STMT_TOKEN,
@@ -186,6 +193,23 @@ std::unique_ptr<ast::LetNode> Parser::parseLetStmt() {
   return std::make_unique<ast::LetNode>(varName, false,
                                         ast::Type(ast::TypeInfo::INT, 0),
                                         std::move(expr), nowLoc);
+}
+
+std::unique_ptr<ast::IfNode> Parser::parseIfStmt() {
+  Location nowLoc = loc;
+  advance();
+  std::cout << "aa" << peek().value << std::endl;
+  std::unique_ptr<ast::ExprNode> cond = parseExpr();
+  std::cout << "bb" << peek().value << std::endl;
+  std::unique_ptr<ast::StmtNode> thenB = parseStmt();
+  thenB->dump(0);
+  std::cout << "cc" << peek().value << std::endl;
+  std::unique_ptr<ast::StmtNode> elseB = nullptr;
+  if (match(TokenType::ELSE)) {
+    elseB = parseStmt();
+  }
+  return std::make_unique<ast::IfNode>(std::move(thenB), std::move(elseB),
+                                       std::move(cond), nowLoc);
 }
 
 } // namespace ally

@@ -1,6 +1,6 @@
 #pragma once
 #include "node/stmt.h"
-#include "terminator.h"
+#include "baseterm.h"
 #include <memory>
 #include <vector>
 
@@ -41,6 +41,11 @@ public:
       // TODO: Compiler Error: Terminatorをnullptrに置き換えようとしている
     }
     terminator = std::move(term);
+  }
+  void insertAllocaNodes(std::vector<std::unique_ptr<AllocaNode>> allocas){
+    for(auto&& i : allocas){
+      statements.insert(statements.begin(), std::move(i));
+    }
   }
   void dump(int indent);
   std::string getBlockName() { return blockName; }

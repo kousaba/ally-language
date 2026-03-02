@@ -5,6 +5,7 @@
 #include "ally/error/ErrorCode.h"
 #include "ally/error/ErrorHandler.h"
 #include "ally/mir/node/expr.h"
+#include "ally/mir/terminator.h"
 #include <string>
 #include <vector>
 
@@ -39,12 +40,26 @@ Block *MIRBuilder::createBlock(std::string name) {
   return currentFunction->createBlock(name +
                                       std::to_string(blockCount[name]++));
 }
-void MIRBuilder::setFunction(Function *f) { currentFunction = f; }
+void MIRBuilder::setFunction(Function *f) {
+  if (!f)
+    return;
+  if (currentFunction) {
+    currentFunction->getEntryBlock()->insertAllocaNodes(std::move(allocaNodes));
+    allocaNodes = std::vector<std::unique_ptr<AllocaNode>>{};
+  }
+  currentFunction = f;
+}
 void MIRBuilder::insert(std::unique_ptr<StmtNode> stmt) {
   currentBlock->addStatement(std::move(stmt));
 }
 void MIRBuilder::insert(std::vector<std::unique_ptr<StmtNode>> stmts) {
   currentBlock->addStatement(std::move(stmts));
+}
+void MIRBuilder::insertAlloca(std::unique_ptr<AllocaNode> alloca) {
+  allocaNodes.push_back(std::move(alloca));
+}
+void MIRBuilder::insertAlloca(std::string name, ast::Type t) {
+  insertAlloca(std::make_unique<AllocaNode>(name, t));
 }
 bool MIRBuilder::terminate(std::unique_ptr<Terminator> term) {
   return currentBlock->setTerminator(std::move(term));
@@ -62,6 +77,7 @@ std::vector<std::unique_ptr<Function>> MIRBuilder::build() {
     std::cout << func->getFunctionName() << std::endl;
     buildNextFunction(std::move(func));
   }
+  setFunction(nullptr);
   return std::move(mir);
 }
 std::unique_ptr<ExprNode> MIRBuilder::buildExpr(ast::ExprNode *expr) {
@@ -121,8 +137,7 @@ std::unique_ptr<ExprNode> MIRBuilder::buildBinaryOp(ast::BinaryOpNode *expr) {
 }
 std::unique_ptr<ExprNode>
 MIRBuilder::buildVariableRef(ast::VariableRefNode *expr) {
-  return std::make_unique<ValueNode>(std::make_unique<VariableValue>(
-      ast::Type(expr->getType()), getNowVariableName(expr->getVarName())));
+  return std::make_unique<LoadNode>(expr->getVarName(), expr->getType());
 }
 void MIRBuilder::buildStmt(ast::StmtNode *stmt) {
   if (!stmt) {
@@ -135,6 +150,8 @@ void MIRBuilder::buildStmt(ast::StmtNode *stmt) {
     buildLetStmt(let);
   else if (auto *block = dynamic_cast<ast::BlockNode *>(stmt))
     buildBlock(block);
+  else if (auto *ifStmt = dynamic_cast<ast::IfNode *>(stmt))
+    buildIfStmt(ifStmt);
   else {
     error::ErrorHandler::getInstance().report(error::Code::COM_MIR_UNKNOWN_STMT,
                                               {});
@@ -145,11 +162,11 @@ void MIRBuilder::buildReturnStmt(ast::ReturnNode *stmt) {
       std::make_unique<ReturnTerminator>(buildExpr(stmt->getValue().get()))));
 }
 void MIRBuilder::buildLetStmt(ast::LetNode *stmt) {
-  std::string newVarName = getNextVariableName(stmt->getVarName());
+  std::string varName = stmt->getVarName();
   ast::Type varType = stmt->getVarType();
-  std::unique_ptr<ast::ExprNode> expr = stmt->getInitExpr();
-  std::unique_ptr<ExprNode> val = buildExpr(expr.get());
-  insert(std::make_unique<AssignmentNode>(newVarName, varType, std::move(val)));
+  insert(std::make_unique<AllocaNode>(varName, varType));
+  std::unique_ptr<ExprNode> val = buildExpr(stmt->getInitExpr().get());
+  insert(std::make_unique<StoreNode>(varName, std::move(val)));
 }
 void MIRBuilder::buildBlock(ast::BlockNode *block) {
   addScope();
@@ -157,5 +174,29 @@ void MIRBuilder::buildBlock(ast::BlockNode *block) {
     buildStmt(stmt.get());
   }
   removeScope();
+}
+void MIRBuilder::buildIfStmt(ast::IfNode *stmt) {
+  std::unique_ptr<ExprNode> cond = buildExpr(stmt->getCondition().get());
+  Block *thenB = createBlock("if.then");
+  Block *elseB = stmt->hasElse() ? createBlock("if.else") : nullptr;
+  Block *mergeB = createBlock("if.merge");
+  Block *falseBlock = elseB ? elseB : mergeB;
+  terminate(std::make_unique<IfTerminator>(std::move(cond), thenB, falseBlock));
+  // ThenBlockの構築
+  setBlock(thenB);
+  buildStmt(stmt->getThenBranch().get());
+  // returnなどがなければmergeにジャンプ
+  if (!currentBlock->hasTerminator()) {
+    terminate(std::make_unique<JumpTerminator>(mergeB));
+  }
+  // ElseBlockの構築
+  if (elseB) {
+    setBlock(elseB);
+    buildStmt(stmt->getElseBranch().get());
+    if (!currentBlock->hasTerminator()) {
+      terminate(std::make_unique<JumpTerminator>(mergeB));
+    }
+  }
+  setBlock(mergeB);
 }
 } // namespace ally::mir

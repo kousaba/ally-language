@@ -1,6 +1,5 @@
 #pragma once
 #include "ally/location.h"
-#include <iostream>
 namespace ally::ast {
 enum class TypeInfo { INT, I32, I16, FLOAT, F32, F16, UNKNOWN };
 
@@ -20,6 +19,7 @@ enum class NodeType {
   BLOCK,
   LET,
   VARREF,
+  IF,
 };
 class Node {
   NodeType nodeType;

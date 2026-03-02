@@ -31,4 +31,11 @@ public:
   std::string getOpName();
   void dump(int indent) override;
 };
+class LoadNode : public ExprNode{
+  std::string varName;
+  ast::Type type;
+public:
+  LoadNode(std::string var, ast::Type t);
+  void dump(int indent) override;
+};
 } // namespace ally::mir

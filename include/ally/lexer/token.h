@@ -26,6 +26,8 @@ enum class TokenType {
   LTE,
   EQEQ,
   NEQ,
+  IF,
+  ELSE,
 };
 struct Token {
   TokenType type;

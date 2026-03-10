@@ -1,0 +1,18 @@
+[package]
+name = "ally-lang"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+inkwell = {version = "0.8.0", features = ["llvm21-1"]}
+
+lasso = "0.7"
+
+anyhow = "1.0"
+clap = { version = "4.0", features = ["derive"] }
+logos = "0.14"
+
+[dev-dependencies]
+indoc = "2.0"
+
+[build-dependencies]

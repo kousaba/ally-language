@@ -43,3 +43,11 @@
 # Build Directory
 build
 .cache
+
+
+# Added by cargo
+
+/target
+
+# LLVM Installer
+llvm.sh

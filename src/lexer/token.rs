@@ -42,6 +42,8 @@ pub enum RawToken {
     Slash,
     #[token(".")]
     Dot,
+    #[token("&")]
+    Ampersand,
     #[token("{")]
     LBracket,
     #[token("}")]
@@ -83,6 +85,7 @@ pub enum AllyToken{
     Asterisk,
     Slash,
     Dot,
+    Ampersand,
     LBracket,
     RBracket,
     LParen,

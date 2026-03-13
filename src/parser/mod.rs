@@ -180,6 +180,18 @@ impl Parser {
                 self.check_consume(AllyToken::RParen);
                 expr
             }
+            AllyToken::Ampersand => {
+                let is_mut = self.check_consume(AllyToken::Mut);
+                let right = self.parse_expr_precedence(ExprPrecedence::Prefix);
+                Expr::Borrow{
+                    is_mut,
+                    expr: Box::new(right),
+                }
+            }
+            AllyToken::Asterisk => {
+                let right = self.parse_expr_precedence(ExprPrecedence::Prefix);
+                Expr::Dereference(Box::new(right))
+            }
             _ => unreachable!()
         }
     }

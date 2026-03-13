@@ -22,6 +22,8 @@ pub enum Expr{
     Variable(Symbol),
     UnaryOp{ op: Op, expr: Box<Expr> },
     BinaryOp{ op: Op, lhs: Box<Expr>, rhs: Box<Expr> },
+    Borrow { is_mut: bool, expr: Box<Expr> },
+    Dereference(Box<Expr>),
     Unknown,
 }
 

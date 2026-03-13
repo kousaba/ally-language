@@ -37,6 +37,7 @@ impl<'a> Lexer<'a> {
             RawToken::Asterisk => AllyToken::Asterisk,
             RawToken::Slash => AllyToken::Slash,
             RawToken::Dot => AllyToken::Dot,
+            RawToken::Ampersand => AllyToken::Ampersand,
             RawToken::LBracket => AllyToken::LBracket,
             RawToken::RBracket => AllyToken::RBracket,
             RawToken::LParen => AllyToken::LParen,

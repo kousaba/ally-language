@@ -5,3 +5,4 @@ pub mod parser;
 pub mod ast;
 pub mod base;
 pub mod sema;
+pub mod mir;

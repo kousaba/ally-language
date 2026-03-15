@@ -150,6 +150,8 @@ impl<'a> Parser<'a>{
             "f64" => Type::F64,
             "f32" => Type::F32,
             "chr" => Type::Chr,
+            "bool" => Type::Bool,
+            "void" => Type::Void,
             _ => Type::Unknown,
         }
     }

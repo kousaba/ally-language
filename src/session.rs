@@ -2,8 +2,6 @@ use inkwell::context::Context;
 use lasso::{Rodeo, Spur};
 use std::path::PathBuf;
 
-pub type Symbol = Spur;
-
 #[derive(Default, Debug, Clone)]
 pub struct SessionConfig {
     pub input_file: PathBuf,
@@ -39,11 +37,11 @@ impl Session{
         }
     }
 
-    pub fn intern(&mut self, s: &str) -> Symbol{
+    pub fn intern(&mut self, s: &str) -> Spur{
         self.interner.get_or_intern(s)
     }
 
-    pub fn lookup(&self, sym: Symbol) -> &str{
+    pub fn lookup(&self, sym: Spur) -> &str{
         self.interner.resolve(&sym)
     }
 }

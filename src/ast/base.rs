@@ -1,4 +1,3 @@
-use crate::session::Symbol;
 use crate::base::span::Span;
 
 #[derive(Debug)]
@@ -17,7 +16,7 @@ pub enum Op{
     NEQ,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Type{
     Int,
     I32,
@@ -26,14 +25,17 @@ pub enum Type{
     F64,
     F32,
     Chr,
+    Bool,
     Void,
+    Ptr(Box<Type>),
+    MutPtr(Box<Type>),
     Unknown,
 }
 
 #[derive(Debug)]
 pub enum ExprInfo{
     Number(i64),
-    Variable(Symbol),
+    Variable(lasso::Spur),
     UnaryOp{ op: Op, expr: Box<Expr> },
     BinaryOp{ op: Op, lhs: Box<Expr>, rhs: Box<Expr> },
     Borrow { is_mut: bool, expr: Box<Expr> },
@@ -61,7 +63,7 @@ impl Expr{
 #[derive(Debug)]
 pub enum StmtInfo{
     Ret(Expr),
-    Let{ name: Symbol, value: Expr, mutable: bool, var_type: Type },
+    Let{ name: lasso::Spur, value: Expr, mutable: bool, var_type: Type },
     Block(Vec<Stmt>),
     If{ cond: Expr, then_b: Box<Stmt>, else_b: Box<Stmt> },
     Unknown,
@@ -81,12 +83,12 @@ impl Stmt{
 
 #[derive(Debug)]
 pub struct Function{
-    pub name: Symbol,
+    pub name: lasso::Spur,
     pub body: Stmt,
 }
 
 impl Function{
-    pub fn new(function_name: Symbol, function_body: Stmt) -> Function{
+    pub fn new(function_name: lasso::Spur, function_body: Stmt) -> Function{
         Self{
             name: function_name,
             body: function_body,
@@ -96,7 +98,7 @@ impl Function{
 
 #[derive(Debug)]
 pub enum TopLevel{
-    Fn{ name: Symbol, block: Stmt },
+    Fn{ name: lasso::Spur, block: Stmt },
 }
 
 #[derive(Debug, Default)]

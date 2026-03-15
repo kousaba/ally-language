@@ -1,5 +1,4 @@
 use logos::Logos;
-use crate::session::Symbol;
 use crate::base::span::Span;
 
 #[derive(Logos, Debug, Clone)]
@@ -99,7 +98,7 @@ pub enum AllyTokenKind{
     Fn,
     Colon,
     Semi,
-    Identifier(Symbol),
+    Identifier(lasso::Spur),
     Int(i64),
     EOF,
 }

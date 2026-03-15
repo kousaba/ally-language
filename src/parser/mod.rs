@@ -1,9 +1,13 @@
-use crate::lexer::AllyToken;
-use crate::ast::base::{Op, Expr, Stmt, Function, Module};
+use crate::lexer::{AllyToken, AllyTokenKind};
+use crate::ast::base::{Op, Type, ExprInfo, Expr, StmtInfo, Stmt, Function, Module};
+use crate::base::span::Span;
+use crate::session::Session;
+use lasso::Spur;
 
-pub struct Parser{
+pub struct Parser<'a>{
     tokens: Vec<AllyToken>,
     pos: usize,
+    sess: &'a Session,
 }
 
 #[derive(Clone, Copy)]
@@ -19,9 +23,9 @@ enum ExprPrecedence{
     Call = 80, // . () []
 }
 
-impl Parser {
-    pub fn new(tokens: Vec<AllyToken>) -> Self{
-        Self { tokens, pos: 0}
+impl<'a> Parser<'a>{
+    pub fn new(tokens: Vec<AllyToken>, session: &'a Session) -> Self{
+        Self { tokens, pos: 0, sess: session}
     }
     pub fn parse_module(&mut self) -> Module{
         let mut module = Module::new();
@@ -42,10 +46,10 @@ impl Parser {
         self.pos += 1;
         tok
     }
-    fn check(&self, token_type: AllyToken) -> bool {
-        self.peek().is_some() && self.peek().unwrap() == token_type
+    fn check(&self, token_type: AllyTokenKind) -> bool {
+        self.peek().is_some_and(|x| x.kind == token_type)
     }
-    fn check_consume(&mut self, token_type: AllyToken) -> bool {
+    fn check_consume(&mut self, token_type: AllyTokenKind) -> bool {
         if self.check(token_type){
             self.consume();
             return true;
@@ -53,12 +57,12 @@ impl Parser {
         false
     }
     fn next_function(&mut self) -> Option<Function>{
-        match self.peek(){
-            Some(AllyToken::Fn) => self.consume(),
-            _ => return None,
-        };
-        let fn_name_id = match self.consume(){
-            AllyToken::Identifier(function_id) => function_id,
+        if !self.check(AllyTokenKind::Fn){
+            return None;
+        }
+        self.consume();
+        let fn_name_id = match self.consume().kind{
+            AllyTokenKind::Identifier(function_id) => function_id,
             _ => return None,
         };
         self.consume(); // (
@@ -68,17 +72,17 @@ impl Parser {
     }
     fn parse_stmt(&mut self) -> Option<Stmt>{
         let token = self.peek()?;
-        let res = match token {
-            AllyToken::If => Some(self.parse_stmt_if()),
-            AllyToken::Let => Some(self.parse_stmt_let()),
-            AllyToken::Ret => Some(self.parse_stmt_ret()),
-            AllyToken::LBracket => Some(self.parse_stmt_block()),
+        let res = match token.kind {
+            AllyTokenKind::If => Some(self.parse_stmt_if()),
+            AllyTokenKind::Let => Some(self.parse_stmt_let()),
+            AllyTokenKind::Ret => Some(self.parse_stmt_ret()),
+            AllyTokenKind::LBracket => Some(self.parse_stmt_block()),
             _ => None?,
         };
         if let Some(ref stmt) = res{
-            match stmt{
-                Stmt::Let { .. } | Stmt::Ret(..) => {
-                    if !self.check_consume(AllyToken::Semi){
+            match stmt.info{
+                StmtInfo::Let { .. } | StmtInfo::Ret(..) => {
+                    if !self.check_consume(AllyTokenKind::Semi){
                         panic!("Expected ';' after statement");
                     }
                 }
@@ -88,65 +92,92 @@ impl Parser {
         res
     }
     fn parse_stmt_if(&mut self) -> Stmt{
-        self.consume();
+        let start_token = self.consume();
+        let start_span = self.get_span(&start_token);
         let condition = self.parse_expr();
         let then_block = self.parse_stmt();
-        if self.check_consume(AllyToken::Else){
+        if self.check_consume(AllyTokenKind::Else){
             let else_block = self.parse_stmt();
-            Stmt::If{
+            let span = start_span.merge(else_block.as_ref().unwrap().span);
+            Stmt::new(StmtInfo::If{
                 cond: condition,
                 then_b: Box::new(then_block.unwrap()),
                 else_b: Box::new(else_block.unwrap()),
-            }
+            }, span)
         }else{
-            Stmt::If{
+            let span = start_span.merge(then_block.as_ref().unwrap().span);
+            Stmt::new(StmtInfo::If{
                 cond: condition,
                 then_b: Box::new(then_block.unwrap()),
-                else_b: Box::new(Stmt::Unknown),
-            }
+                else_b: Box::new(Stmt::new(StmtInfo::Unknown, span)),
+            }, span)
         }
     }
     fn parse_stmt_let(&mut self) -> Stmt{
-        self.consume();
-        let is_mutable = self.check_consume(AllyToken::Mut);
-        let var_name = match self.consume(){
-            AllyToken::Identifier(name) => name,
+        let start_token = self.consume();
+        let start_span = self.get_span(&start_token);
+        let is_mutable = self.check_consume(AllyTokenKind::Mut);
+        let var_name = match self.consume().kind{
+            AllyTokenKind::Identifier(name) => name,
             _ => unreachable!(),
         };
-        if self.check_consume(AllyToken::Assign) {
-            let init_value = self.parse_expr();
-            Stmt::Let{
-                name: var_name,
-                value: init_value,
-                mutable: is_mutable,
-            }
-        }else{
-            Stmt::Let{
-                name: var_name,
-                value: Expr::Unknown,
-                mutable: is_mutable,
-            }
+        let mut vartype = Type::Unknown;
+        if self.check_consume(AllyTokenKind::Colon){
+            let type_name_id = match self.consume().kind{
+                AllyTokenKind::Identifier(name_id) => name_id,
+                _ => unreachable!(),
+            };
+            vartype = self.id_to_type(type_name_id);
+        }
+        let mut end_span = start_span;
+        let mut value = Expr::new(ExprInfo::Unknown, start_span);
+        if self.check_consume(AllyTokenKind::Assign) {
+            value = self.parse_expr();
+            end_span = value.span;
+        }
+        Stmt::new(
+            StmtInfo::Let { name: var_name, value, mutable: is_mutable, var_type: vartype },
+            start_span.merge(end_span)
+        )
+    }
+    fn id_to_type(&self, id: Spur) -> Type{
+        let type_str = self.sess.lookup(id);
+        match type_str{
+            "int" => Type::Int,
+            "i32" => Type::I32,
+            "uint" => Type::Uint,
+            "u32" => Type::U32,
+            "f64" => Type::F64,
+            "f32" => Type::F32,
+            "chr" => Type::Chr,
+            _ => Type::Unknown,
         }
     }
     fn parse_stmt_ret(&mut self) -> Stmt{
-        self.consume(); // ret keyword
-        self.consume(); // = todo: <-実装
+        let start_token = self.consume();
+        let start_span = self.get_span(&start_token);
+        self.consume();
         let expr = self.parse_expr();
-        Stmt::Ret(expr)
+        let end_span = expr.span;
+        Stmt::new(
+            StmtInfo::Ret(expr),
+            start_span.merge(end_span)
+        )
     }
     fn parse_stmt_block(&mut self) -> Stmt{
-        self.consume();
+        let l_bracket = self.consume();
+        let start_span = self.get_span(&l_bracket);
         let mut stmts = Vec::new();
-        while !self.check_consume(AllyToken::RBracket) {
+        while !self.check(AllyTokenKind::RBracket) {
             if let Some(stmt) = self.parse_stmt(){
                 stmts.push(stmt);
             }else{
-                let bad_token = self.peek();
-                panic!("Unexpected token in block: {:?}", bad_token);
+                break;
             }
         }
-        self.consume(); // } 
-        Stmt::Block(stmts)
+        let r_bracket = self.consume();
+        let span = start_span.merge(self.get_span(&r_bracket));
+        Stmt::new(StmtInfo::Block(stmts), span)
     }
     fn parse_expr(&mut self) -> Expr{
         self.parse_expr_precedence(ExprPrecedence::None)
@@ -165,50 +196,52 @@ impl Parser {
     }
     fn parse_prefix(&mut self) -> Expr{
         let token = self.consume();
-        match token {
-            AllyToken::Identifier(id) => Expr::Variable(id),
-            AllyToken::Int(val) => Expr::Number(val),
-            AllyToken::Minus => {
+        let start_span = self.get_span(&token);
+        match token.kind {
+            AllyTokenKind::Identifier(id) => Expr::new(ExprInfo::Variable(id), start_span),
+            AllyTokenKind::Int(val) => Expr::new(ExprInfo::Number(val), start_span),
+            AllyTokenKind::Minus => {
                 let right = self.parse_expr_precedence(ExprPrecedence::Prefix);
-                Expr::UnaryOp{
-                    op: Op::Neg,
-                    expr: Box::new(right),
-                }
+                let right_span = right.span;
+                Expr::new(
+                    ExprInfo::UnaryOp{
+                        op: Op::Neg,
+                        expr: Box::new(right),
+                    },
+                    start_span.merge(right_span)
+                )
             }
-            AllyToken::LParen => {
-                let expr = self.parse_expr_precedence(ExprPrecedence::None);
-                self.check_consume(AllyToken::RParen);
-                expr
+            AllyTokenKind::LParen => {
+                let expr = self.parse_expr();
+                let r_paren = self.consume();
+                let span = start_span.merge(self.get_span(&r_paren));
+                Expr::new(expr.info, span)
             }
-            AllyToken::Ampersand => {
-                let is_mut = self.check_consume(AllyToken::Mut);
+            AllyTokenKind::Ampersand => {
+                let is_mut = self.check_consume(AllyTokenKind::Mut);
                 let right = self.parse_expr_precedence(ExprPrecedence::Prefix);
-                Expr::Borrow{
-                    is_mut,
-                    expr: Box::new(right),
-                }
+                let span = start_span.merge(right.span);
+                Expr::new(ExprInfo::Borrow { is_mut, expr: Box::new(right) }, span)
             }
-            AllyToken::Asterisk => {
+            AllyTokenKind::Asterisk => {
                 let right = self.parse_expr_precedence(ExprPrecedence::Prefix);
-                Expr::Dereference(Box::new(right))
+                let span = start_span.merge(right.span);
+                Expr::new(ExprInfo::Dereference(Box::new(right)), span)
             }
             _ => unreachable!()
         }
     }
     fn parse_infix(&mut self, left: Expr, precedence: ExprPrecedence) -> Expr{
         let token = self.tokens[self.pos - 1];
-        match token{
-            AllyToken::Plus | AllyToken::Minus | AllyToken::Asterisk | AllyToken::Slash |
-            AllyToken::Eq | AllyToken::Ne | AllyToken::Lt | AllyToken::Gt |
-            AllyToken::And | AllyToken::Or => {
+        match token.kind{
+            AllyTokenKind::Plus | AllyTokenKind::Minus | AllyTokenKind::Asterisk | AllyTokenKind::Slash |
+            AllyTokenKind::Eq | AllyTokenKind::Ne | AllyTokenKind::Lt | AllyTokenKind::Gt |
+            AllyTokenKind::And | AllyTokenKind::Or => {
                 let right = self.parse_expr_precedence(precedence);
-                Expr::BinaryOp{
-                    op: self.token_to_op(token).unwrap(),
-                    lhs: Box::new(left),
-                    rhs: Box::new(right),
-                }
+                let span = left.span.merge(right.span);
+                Expr::new(ExprInfo::BinaryOp { op: self.token_to_op(token).unwrap(), lhs: Box::new(left), rhs: Box::new(right) }, span)
             }
-            AllyToken::LParen => {
+            AllyTokenKind::LParen => {
                 // self.parse_call(left)
                 todo!()
             }
@@ -216,30 +249,33 @@ impl Parser {
         }
     }
     fn token_to_op(&self, token_type: AllyToken) -> Option<Op>{
-        match token_type {
-            AllyToken::Eq => Some(Op::EQ),
-            AllyToken::Ne => Some(Op::NEQ),
-            AllyToken::Lt => Some(Op::LT),
-            AllyToken::Gt => Some(Op::GT),
-            AllyToken::And => Some(Op::And),
-            AllyToken::Or => Some(Op::Or),
-            AllyToken::Plus => Some(Op::Add),
-            AllyToken::Minus => Some(Op::Sub),
-            AllyToken::Asterisk => Some(Op::Mul),
-            AllyToken::Slash => Some(Op::Div),
+        match token_type.kind {
+            AllyTokenKind::Eq => Some(Op::EQ),
+            AllyTokenKind::Ne => Some(Op::NEQ),
+            AllyTokenKind::Lt => Some(Op::LT),
+            AllyTokenKind::Gt => Some(Op::GT),
+            AllyTokenKind::And => Some(Op::And),
+            AllyTokenKind::Or => Some(Op::Or),
+            AllyTokenKind::Plus => Some(Op::Add),
+            AllyTokenKind::Minus => Some(Op::Sub),
+            AllyTokenKind::Asterisk => Some(Op::Mul),
+            AllyTokenKind::Slash => Some(Op::Div),
             _ => unreachable!(),
         }
     }
     fn get_precedence(&self, token: AllyToken) -> ExprPrecedence {
-        match token {
-            AllyToken::Assign => ExprPrecedence::Assignment,
-            AllyToken::Or => ExprPrecedence::Or,
-            AllyToken::And => ExprPrecedence::And,
-            AllyToken::Eq | AllyToken::Ne | AllyToken::Lt | AllyToken::Gt => ExprPrecedence::Comparison,
-            AllyToken::Plus | AllyToken::Minus => ExprPrecedence::Sum,
-            AllyToken::Asterisk | AllyToken::Slash => ExprPrecedence::Product,
-            AllyToken::LParen | AllyToken::Dot | AllyToken::LBracket => ExprPrecedence::Call,
+        match token.kind {
+            AllyTokenKind::Assign | AllyTokenKind::MoveAssign => ExprPrecedence::Assignment,
+            AllyTokenKind::Or => ExprPrecedence::Or,
+            AllyTokenKind::And => ExprPrecedence::And,
+            AllyTokenKind::Eq | AllyTokenKind::Ne | AllyTokenKind::Lt | AllyTokenKind::Gt => ExprPrecedence::Comparison,
+            AllyTokenKind::Plus | AllyTokenKind::Minus => ExprPrecedence::Sum,
+            AllyTokenKind::Asterisk | AllyTokenKind::Slash => ExprPrecedence::Product,
+            AllyTokenKind::LParen | AllyTokenKind::Dot => ExprPrecedence::Call,
             _ => ExprPrecedence::None,
         }
+    }
+    fn get_span(&self, token: &AllyToken) -> Span{
+        token.span
     }
 }

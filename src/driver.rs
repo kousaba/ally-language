@@ -17,18 +17,19 @@ fn lexer(sess: &mut Session, source: &str) -> Vec<AllyToken>{
     let tokens = lexer.tokenize_all(sess);
 
     for token in &tokens{
-        match token{
-            crate::lexer::AllyToken::Identifier(sym) => {
-                println!("Identifier: {} (ID: {:?})", sess.lookup(*sym), sym);
+        println!("Token: {token:?}");
+        /*match token.kind{
+            crate::lexer::AllyTokenKind::Identifier(sym) => {
+                println!("Identifier: {} (ID: {:?})", sess.lookup(sym), sym);
             }
             other => println!("Token: {other:?}"),
-        }
+        }*/
     }
     
     tokens
 }
 
 fn parser(sess: &mut Session, tokens: Vec<AllyToken>) -> Module{
-    let mut parser = Parser::new(tokens);
+    let mut parser = Parser::new(tokens, sess);
     parser.parse_module()
 }

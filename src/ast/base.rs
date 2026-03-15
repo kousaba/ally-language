@@ -1,4 +1,5 @@
 use crate::session::Symbol;
+use crate::base::span::Span;
 
 #[derive(Debug)]
 pub enum Op{
@@ -17,7 +18,20 @@ pub enum Op{
 }
 
 #[derive(Debug)]
-pub enum Expr{
+pub enum Type{
+    Int,
+    I32,
+    Uint,
+    U32,
+    F64,
+    F32,
+    Chr,
+    Void,
+    Unknown,
+}
+
+#[derive(Debug)]
+pub enum ExprInfo{
     Number(i64),
     Variable(Symbol),
     UnaryOp{ op: Op, expr: Box<Expr> },
@@ -28,12 +42,41 @@ pub enum Expr{
 }
 
 #[derive(Debug)]
-pub enum Stmt{
+pub struct Expr{
+    pub info: ExprInfo,
+    pub expr_type: Type,
+    pub span: Span,
+}
+
+impl Expr{
+    pub fn new(info: ExprInfo, span: Span) -> Self{
+        Self{
+            info,
+            expr_type: Type::Unknown,
+            span,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum StmtInfo{
     Ret(Expr),
-    Let{ name: Symbol, value: Expr, mutable: bool },
+    Let{ name: Symbol, value: Expr, mutable: bool, var_type: Type },
     Block(Vec<Stmt>),
     If{ cond: Expr, then_b: Box<Stmt>, else_b: Box<Stmt> },
     Unknown,
+}
+
+#[derive(Debug)]
+pub struct Stmt{
+    pub info: StmtInfo,
+    pub span: Span,
+}
+
+impl Stmt{
+    pub fn new(info: StmtInfo, span: Span) -> Self{
+        Self { info, span }
+    }
 }
 
 #[derive(Debug)]
@@ -56,7 +99,7 @@ pub enum TopLevel{
     Fn{ name: Symbol, block: Stmt },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Module {
     pub functions: Vec<Function>,
 }

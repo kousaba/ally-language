@@ -1,5 +1,6 @@
 use logos::Logos;
 use crate::session::Symbol;
+use crate::base::span::Span;
 
 #[derive(Logos, Debug, Clone)]
 pub enum RawToken {
@@ -32,6 +33,8 @@ pub enum RawToken {
     Or,
     #[token("=")]
     Assign,
+    #[token("<-")]
+    MoveAssign,
     #[token("+")]
     Plus,
     #[token("-")]
@@ -52,6 +55,8 @@ pub enum RawToken {
     LParen,
     #[token(")")]
     RParen,
+    #[token(":")]
+    Colon,
     #[token(";")]
     Semi,
 
@@ -66,7 +71,7 @@ pub enum RawToken {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum AllyToken{
+pub enum AllyTokenKind{
     If,
     Else,
     For,
@@ -80,6 +85,7 @@ pub enum AllyToken{
     And,
     Or,
     Assign,
+    MoveAssign,
     Plus,
     Minus,
     Asterisk,
@@ -91,8 +97,21 @@ pub enum AllyToken{
     LParen,
     RParen,
     Fn,
+    Colon,
     Semi,
     Identifier(Symbol),
     Int(i64),
     EOF,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct AllyToken{
+    pub kind: AllyTokenKind,
+    pub span: Span,
+}
+
+impl AllyToken{
+    pub fn new(kind: AllyTokenKind, span: Span) -> Self{
+        Self {kind, span}
+    }
 }

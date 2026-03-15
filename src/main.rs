@@ -11,12 +11,7 @@ pub fn main() -> anyhow::Result<()>{
     dbg!(&session);
     let source = r#"
     fn main(){
-        let a = 0;
-        if a > 10{
-            ret = 5;
-        } else {
-            ret = 10;
-        }
+        let a: int = 0;
     }
     "#;
     ally_lang::driver::compile(&mut session, source)?;

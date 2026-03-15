@@ -1,6 +1,6 @@
 use crate::base::span::Span;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Op{
     Neg,
     Not,

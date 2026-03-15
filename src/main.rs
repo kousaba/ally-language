@@ -12,6 +12,7 @@ pub fn main() -> anyhow::Result<()>{
     let source = r#"
     fn main(){
         let a = 5;
+        let b = &a;
         if a > 5{
             ret = 5;
         }else{

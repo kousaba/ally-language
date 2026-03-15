@@ -1,4 +1,4 @@
-use crate::ast::base::{Module, Function, Type, Stmt, Expr, StmtInfo, ExprInfo};
+use crate::ast::base::{Module, Function, Type, Stmt, Expr, StmtInfo, ExprInfo, Op};
 use crate::sema::symbol::Symbol;
 use crate::sema::scope::{ScopeStack, VariableInfo};
 use std::collections::HashMap;
@@ -63,6 +63,9 @@ impl Analyzer{
                 }
                 expr.expr_type = lhs_type;
                 // todo: 条件演算子ならbool
+                if *op == Op::LT || *op == Op::GT || *op == Op::EQ || *op == Op::NEQ{
+                    expr.expr_type = Type::Bool;
+                }
             }
             ExprInfo::UnaryOp{op, expr} => {
                 // 中身のまま

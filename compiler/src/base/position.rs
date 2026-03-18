@@ -2,8 +2,8 @@ use super::span::Span;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Position{
-    line: usize,
-    column: usize,
+    pub line: usize,
+    pub column: usize,
 }
 
 impl Position{

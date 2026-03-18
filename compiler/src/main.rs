@@ -6,5 +6,6 @@ pub fn main() -> anyhow::Result<()>{
     let sess = Session::from_args(args); 
     let source = sess.file_path.to_string_lossy().into_owned();
     println!("Source: {source}");
+    dbg!(sess);
     Ok(())
 }

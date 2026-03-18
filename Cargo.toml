@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = [
+  "compiler"
+]
+
+[workspace.dependencies]
+lasso = "0.7"
+anyhow = "1.0"
